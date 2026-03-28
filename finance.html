@@ -80,65 +80,72 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
 
 /* ═══ MOBILE RESPONSIVE ═══ */
 @media (max-width: 768px) {
-  .mx { padding: 10px; }
-  h1 { font-size: 18px; }
-  .sub-h { font-size: 10px; margin-bottom: 12px; }
+  .mx { padding: 8px; }
+  h1 { font-size: 20px; }
+  .sub-h { font-size: 10px; margin-bottom: 10px; }
   .val { font-size: 17px; }
   .card { padding: 10px; border-radius: 8px; }
+  .grid { gap: 8px; margin-bottom: 10px; }
 
-  /* All grids stack or go 2-col on mobile */
+  /* All grids: 2-col */
   .g3, .g4, .g5 { grid-template-columns: repeat(2, 1fr); }
   .g2 { grid-template-columns: 1fr 1fr; }
 
-  /* Tabs scroll horizontally */
-  .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
-  .tab { white-space: nowrap; flex-shrink: 0; padding: 6px 12px; font-size: 11px; }
+  /* Tabs: horizontal scroll, bigger touch targets */
+  .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; gap: 6px; }
+  .tab { white-space: nowrap; flex-shrink: 0; padding: 8px 14px; font-size: 12px; border-radius: 8px; }
 
-  /* Form fields stack */
-  .form-row { flex-direction: column; gap: 6px; }
-  .ff { width: 100% !important; flex: none !important; }
-  .form { padding: 12px; }
+  /* Form: fields stay side by side when marked, stack otherwise */
+  .form-row { gap: 8px; }
+  .form { padding: 12px; border-radius: 10px; }
 
   /* Progress bars */
-  .prg-h .t { font-size: 11px; }
-  .prg-h .a { font-size: 13px; }
-  .prg-track { height: 16px; }
+  .prg { margin-bottom: 10px; }
+  .prg-h .t { font-size: 12px; }
+  .prg-h .a { font-size: 14px; }
+  .prg-track { height: 18px; }
 
-  /* Expense cap cards: 2 per row */
-  #expCaps { grid-template-columns: 1fr 1fr !important; }
+  /* Expense cap cards: 2 per row always */
+  #expCaps { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
 
   /* Caps editor: 2 per row */
   #capsEditor .form-row { flex-direction: row; flex-wrap: wrap; }
   #capsEditor .ff { width: calc(50% - 4px) !important; flex: none !important; }
 
-  /* Tables: smaller text, horizontal scroll */
-  table { font-size: 10px; }
-  th { padding: 4px 6px; font-size: 8px; }
-  td { padding: 5px 6px; }
+  /* Tables: readable on phone */
+  table { font-size: 11px; }
+  th { padding: 6px; font-size: 9px; }
+  td { padding: 6px; }
 
-  /* Budget bars hide on mobile for space */
+  /* Budget bars hide on mobile */
   .brow .bar-w { display: none; }
   .brow .amt { width: 60px; }
 
-  /* Gold info single column */
+  /* Gold info */
   .gold-info { grid-template-columns: 1fr; }
 
   /* Section title */
-  .sec-t { font-size: 12px; flex-wrap: wrap; gap: 4px; }
+  .sec-t { font-size: 13px; flex-wrap: wrap; gap: 4px; }
 
-  /* Top cards smaller values */
-  .grid .card .val { font-size: 15px; }
+  /* Top cards */
+  .grid .card .val { font-size: 16px; }
   .grid .card .sm { font-size: 9px; }
-  .grid .card .lbl { font-size: 8px; }
+  .grid .card .lbl { font-size: 8px; letter-spacing: 0.5px; }
 
-  /* Savings summary grid */
+  /* Savings summary */
   #expSavingSummary .grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Log expense form: keep category + amount side by side */
+  .pane .form .form-row { flex-direction: row; flex-wrap: wrap; }
+  .pane .form .ff { min-width: 0; }
 }
 
 @media (max-width: 400px) {
-  .g2, .g3, .g4, .g5 { grid-template-columns: 1fr; }
+  .g2 { grid-template-columns: 1fr; }
+  .g3, .g4, .g5 { grid-template-columns: 1fr 1fr; }
   #expCaps { grid-template-columns: 1fr 1fr !important; }
   .prg-h { flex-direction: column; gap: 2px; }
+  h1 { font-size: 18px; }
 }
 </style>
 </head>
@@ -227,14 +234,10 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
 <!-- DAILY EXPENSES -->
 <div class="pane active" id="expenses">
 
-  <!-- This month's spending vs caps -->
-  <div class="grid g4" id="expCaps"></div>
-
-  <!-- Quick add expense -->
-  <div class="form" style="margin-top:10px;">
+  <!-- Quick add expense — ALWAYS ON TOP -->
+  <div class="form">
     <div class="form-t">Log Expense</div>
     <div class="form-row">
-      <div class="ff" style="flex:0.8;"><label>Date</label><input type="date" id="expDate" /></div>
       <div class="ff" style="flex:1;">
         <label>Category</label>
         <select id="expCat">
@@ -249,10 +252,22 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
         </select>
       </div>
       <div class="ff" style="flex:0.7;"><label>Amount $</label><input type="number" id="expAmt" placeholder="25" step="0.01" /></div>
-      <div class="ff" style="flex:1.5;"><label>What</label><input type="text" id="expWhat" placeholder="Walmart groceries, Chipotle, Amazon..." /></div>
-      <div class="ff"><label>&nbsp;</label><button class="btn btn-gold" onclick="addExpense()">+</button></div>
     </div>
+    <div class="form-row">
+      <div class="ff" style="flex:1;"><label>What</label><input type="text" id="expWhat" placeholder="Walmart, Chipotle, Amazon..." /></div>
+      <div class="ff" style="flex:0.6;"><label>Date</label><input type="date" id="expDate" /></div>
+    </div>
+    <button class="btn btn-gold" onclick="addExpense()" style="width:100%;margin-top:4px;">+ Add Expense</button>
   </div>
+
+  <!-- Today's expenses right below -->
+  <div class="sec" style="margin-top:10px;">
+    <div class="sec-t">Today <span class="badge by" id="todayTotal">$0</span></div>
+    <div id="todayExpenses" style="font-size:11px;color:var(--muted);"></div>
+  </div>
+
+  <!-- This month's spending vs caps -->
+  <div class="grid g4" id="expCaps"></div>
 
   <!-- Monthly caps editor -->
   <div class="card" style="margin-top:10px;">
@@ -275,12 +290,6 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
       </div>
       <div class="sm" style="margin-top:4px;">Total variable cap: <span class="gld" id="totalCap">$0</span> | Fixed expenses (rent+car+utilities): <span>$2,212</span></div>
     </div>
-  </div>
-
-  <!-- Today's expenses -->
-  <div class="sec" style="margin-top:14px;">
-    <div class="sec-t">Today <span class="badge by" id="todayTotal">$0</span></div>
-    <div id="todayExpenses" style="font-size:11px;color:var(--muted);"></div>
   </div>
 
   <!-- This month's expense list -->
