@@ -140,7 +140,15 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
   </div>
   <div class="card c"><div class="lbl">Total Sent</div><div class="val gld" style="font-size:16px;" id="totalSaved">$0</div><div class="sm" id="totalSavedInr">₹0</div></div>
   <div class="card c"><div class="lbl">Months Left</div><div class="val" style="font-size:16px;" id="monthsLeft">20</div><div class="sm" id="monthTarget">Oct 2027</div></div>
-  <div class="card c"><div class="lbl">Robinhood (Hold)</div><div class="val" style="font-size:16px;color:var(--blue);">$22K</div><div class="sm">Cash out month 8-10</div></div>
+  <div class="card c" style="cursor:pointer;" onclick="document.getElementById('rhEditWrap').style.display=document.getElementById('rhEditWrap').style.display==='none'?'block':'none';">
+    <div class="lbl">Robinhood Portfolio</div>
+    <div class="val" style="font-size:16px;color:var(--blue);" id="rhDisplay">$22,058</div>
+    <div class="sm">Click to update</div>
+    <div id="rhEditWrap" style="display:none;margin-top:8px;" onclick="event.stopPropagation();">
+      <input type="number" id="rhCurrent" value="22058" style="width:100%;background:var(--input);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-size:12px;text-align:center;outline:none;" onchange="updateRh()" />
+      <div class="sm" style="margin-top:3px;">Current portfolio value</div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ TABS ══ -->
@@ -289,6 +297,19 @@ function load() { try { return JSON.parse(localStorage.getItem(STORAGE)) || []; 
 function save(d) { localStorage.setItem(STORAGE, JSON.stringify(d)); }
 
 let payments = load();
+
+// Robinhood value persistence
+const RH_KEY = 'fin_rh_value';
+function loadRh() { return parseFloat(localStorage.getItem(RH_KEY)) || 22058; }
+function saveRh(v) { localStorage.setItem(RH_KEY, v); }
+
+function updateRh() {
+  const val = parseFloat(document.getElementById('rhCurrent').value) || 0;
+  saveRh(val);
+  document.getElementById('rhDisplay').textContent = '$' + val.toLocaleString('en-US', {maximumFractionDigits:0});
+  document.getElementById('bRobinhood').value = val;
+  render();
+}
 
 // Set default date
 document.getElementById('payDate').valueAsDate = new Date();
@@ -648,6 +669,12 @@ function showTab(id, btn) {
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
 }
+
+// Load saved Robinhood value
+const savedRh = loadRh();
+document.getElementById('rhCurrent').value = savedRh;
+document.getElementById('rhDisplay').textContent = '$' + savedRh.toLocaleString('en-US', {maximumFractionDigits:0});
+document.getElementById('bRobinhood').value = savedRh;
 
 render();
 </script>
