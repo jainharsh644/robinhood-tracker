@@ -153,15 +153,97 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
 
 <!-- ══ TABS ══ -->
 <div class="tabs">
-  <button class="tab active" onclick="showTab('payments',this)">Log Payment</button>
+  <button class="tab active" onclick="showTab('expenses',this)">Daily Expenses</button>
+  <button class="tab" onclick="showTab('payments',this)">Log Payment</button>
   <button class="tab" onclick="showTab('budget',this)">Monthly Budget</button>
   <button class="tab" onclick="showTab('timeline',this)">Timeline</button>
   <button class="tab" onclick="showTab('gold',this)">Gold Calculator</button>
   <button class="tab" onclick="showTab('history',this)">History</button>
 </div>
 
+<!-- DAILY EXPENSES -->
+<div class="pane active" id="expenses">
+
+  <!-- This month's spending vs caps -->
+  <div class="grid g4" id="expCaps"></div>
+
+  <!-- Quick add expense -->
+  <div class="form" style="margin-top:10px;">
+    <div class="form-t">Log Expense</div>
+    <div class="form-row">
+      <div class="ff" style="flex:0.8;"><label>Date</label><input type="date" id="expDate" /></div>
+      <div class="ff" style="flex:1;">
+        <label>Category</label>
+        <select id="expCat">
+          <option value="grocery">Grocery</option>
+          <option value="food_out">Food / Eating Out</option>
+          <option value="shopping">Shopping</option>
+          <option value="gas">Gas / Transport</option>
+          <option value="health">Health / Medical</option>
+          <option value="subscriptions">Subscriptions</option>
+          <option value="personal">Personal / Misc</option>
+          <option value="trips">Trips / Travel</option>
+        </select>
+      </div>
+      <div class="ff" style="flex:0.7;"><label>Amount $</label><input type="number" id="expAmt" placeholder="25" step="0.01" /></div>
+      <div class="ff" style="flex:1.5;"><label>What</label><input type="text" id="expWhat" placeholder="Walmart groceries, Chipotle, Amazon..." /></div>
+      <div class="ff"><label>&nbsp;</label><button class="btn btn-gold" onclick="addExpense()">+</button></div>
+    </div>
+  </div>
+
+  <!-- Monthly caps editor -->
+  <div class="card" style="margin-top:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="document.getElementById('capsEditor').style.display=document.getElementById('capsEditor').style.display==='none'?'block':'none';">
+      <span class="lbl" style="margin:0;">Monthly Caps (click to edit)</span>
+      <span style="font-size:10px;color:var(--muted);">&#9660;</span>
+    </div>
+    <div id="capsEditor" style="display:none;margin-top:8px;">
+      <div class="form-row">
+        <div class="ff" style="flex:1;"><label>Grocery</label><input type="number" id="capGrocery" value="150" onchange="saveCaps()" /></div>
+        <div class="ff" style="flex:1;"><label>Food Out</label><input type="number" id="capFoodOut" value="75" onchange="saveCaps()" /></div>
+        <div class="ff" style="flex:1;"><label>Shopping</label><input type="number" id="capShopping" value="100" onchange="saveCaps()" /></div>
+        <div class="ff" style="flex:1;"><label>Gas</label><input type="number" id="capGas" value="80" onchange="saveCaps()" /></div>
+      </div>
+      <div class="form-row">
+        <div class="ff" style="flex:1;"><label>Health</label><input type="number" id="capHealth" value="50" onchange="saveCaps()" /></div>
+        <div class="ff" style="flex:1;"><label>Subscriptions</label><input type="number" id="capSubs" value="30" onchange="saveCaps()" /></div>
+        <div class="ff" style="flex:1;"><label>Personal</label><input type="number" id="capPersonal" value="50" onchange="saveCaps()" /></div>
+        <div class="ff" style="flex:1;"><label>Trips (monthly)</label><input type="number" id="capTrips" value="500" onchange="saveCaps()" /></div>
+      </div>
+      <div class="sm" style="margin-top:4px;">Total variable cap: <span class="gld" id="totalCap">$0</span> | Fixed expenses (rent+car+utilities): <span>$2,212</span></div>
+    </div>
+  </div>
+
+  <!-- Today's expenses -->
+  <div class="sec" style="margin-top:14px;">
+    <div class="sec-t">Today <span class="badge by" id="todayTotal">$0</span></div>
+    <div id="todayExpenses" style="font-size:11px;color:var(--muted);"></div>
+  </div>
+
+  <!-- This month's expense list -->
+  <div class="sec">
+    <div class="sec-t">
+      <span id="expMonthLabel">This Month</span>
+      <div>
+        <button class="btn-out" onclick="changeExpMonth(-1)">&larr;</button>
+        <span class="badge by" id="monthExpTotal" style="margin:0 6px;">$0</span>
+        <button class="btn-out" onclick="changeExpMonth(1)">&rarr;</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;max-height:350px;overflow-y:auto;">
+      <table>
+        <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>What</th><th></th></tr></thead>
+        <tbody id="expBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">No expenses logged yet.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Monthly savings summary -->
+  <div class="card" id="expSavingSummary"></div>
+</div>
+
 <!-- LOG PAYMENT -->
-<div class="pane active" id="payments">
+<div class="pane" id="payments">
   <div class="form">
     <div class="form-t">Log Payment / Purchase</div>
     <div class="form-row">
@@ -311,6 +393,194 @@ function updateRh() {
   render();
 }
 
+// ═══════════════════════════════════════
+// DAILY EXPENSE TRACKER
+// ═══════════════════════════════════════
+const EXP_KEY = 'fin_daily_expenses';
+const CAPS_KEY = 'fin_expense_caps';
+
+function loadExpenses() { try { return JSON.parse(localStorage.getItem(EXP_KEY)) || []; } catch(e) { return []; } }
+function saveExpenses(d) { localStorage.setItem(EXP_KEY, JSON.stringify(d)); }
+
+const DEFAULT_CAPS = { grocery:150, food_out:75, shopping:100, gas:80, health:50, subscriptions:30, personal:50, trips:500 };
+function loadCaps() { try { return JSON.parse(localStorage.getItem(CAPS_KEY)) || DEFAULT_CAPS; } catch(e) { return DEFAULT_CAPS; } }
+function saveCaps() {
+  const caps = {
+    grocery: parseFloat(document.getElementById('capGrocery').value) || 0,
+    food_out: parseFloat(document.getElementById('capFoodOut').value) || 0,
+    shopping: parseFloat(document.getElementById('capShopping').value) || 0,
+    gas: parseFloat(document.getElementById('capGas').value) || 0,
+    health: parseFloat(document.getElementById('capHealth').value) || 0,
+    subscriptions: parseFloat(document.getElementById('capSubs').value) || 0,
+    personal: parseFloat(document.getElementById('capPersonal').value) || 0,
+    trips: parseFloat(document.getElementById('capTrips').value) || 0,
+  };
+  localStorage.setItem(CAPS_KEY, JSON.stringify(caps));
+  const total = Object.values(caps).reduce((s,v) => s+v, 0);
+  document.getElementById('totalCap').textContent = '$' + total.toLocaleString();
+  renderExpenses();
+}
+
+let expenses = loadExpenses();
+let expViewMonth = new Date().getMonth();
+let expViewYear = new Date().getFullYear();
+
+// Set default expense date
+document.getElementById('expDate').valueAsDate = new Date();
+
+// Load saved caps
+const savedCaps = loadCaps();
+document.getElementById('capGrocery').value = savedCaps.grocery;
+document.getElementById('capFoodOut').value = savedCaps.food_out;
+document.getElementById('capShopping').value = savedCaps.shopping;
+document.getElementById('capGas').value = savedCaps.gas;
+document.getElementById('capHealth').value = savedCaps.health;
+document.getElementById('capSubs').value = savedCaps.subscriptions;
+document.getElementById('capPersonal').value = savedCaps.personal;
+document.getElementById('capTrips').value = savedCaps.trips;
+const capTotal = Object.values(savedCaps).reduce((s,v) => s+v, 0);
+document.getElementById('totalCap').textContent = '$' + capTotal.toLocaleString();
+
+const CAT_LABELS = { grocery:'Grocery', food_out:'Food Out', shopping:'Shopping', gas:'Gas', health:'Health', subscriptions:'Subs', personal:'Personal', trips:'Trips' };
+const CAT_COLORS = { grocery:'var(--green)', food_out:'var(--gold)', shopping:'var(--purple)', gas:'var(--blue)', health:'#ef4444', subscriptions:'var(--muted)', personal:'var(--sub)', trips:'#f97316' };
+
+function addExpense() {
+  const date = document.getElementById('expDate').value;
+  const cat = document.getElementById('expCat').value;
+  const amt = parseFloat(document.getElementById('expAmt').value);
+  const what = document.getElementById('expWhat').value.trim();
+  if (!date || isNaN(amt) || amt <= 0) { alert('Enter date and amount.'); return; }
+  expenses.push({ id: Date.now(), date, cat, amt: Math.round(amt*100)/100, what });
+  expenses.sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+  saveExpenses(expenses);
+  document.getElementById('expAmt').value = '';
+  document.getElementById('expWhat').value = '';
+  renderExpenses();
+}
+
+function delExpense(id) {
+  if (!confirm('Delete?')) return;
+  expenses = expenses.filter(e => e.id !== id);
+  saveExpenses(expenses);
+  renderExpenses();
+}
+
+function changeExpMonth(delta) {
+  expViewMonth += delta;
+  if (expViewMonth > 11) { expViewMonth = 0; expViewYear++; }
+  if (expViewMonth < 0) { expViewMonth = 11; expViewYear--; }
+  renderExpenses();
+}
+
+function renderExpenses() {
+  const caps = loadCaps();
+  const today = new Date().toISOString().slice(0,10);
+  const monthStr = `${expViewYear}-${String(expViewMonth+1).padStart(2,'0')}`;
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  const monthExp = expenses.filter(e => e.date.startsWith(monthStr));
+  const todayExp = expenses.filter(e => e.date === today);
+
+  // Category spending this month
+  const byCat = {};
+  monthExp.forEach(e => { byCat[e.cat] = (byCat[e.cat]||0) + e.amt; });
+
+  // Caps cards
+  const capsDiv = document.getElementById('expCaps');
+  capsDiv.innerHTML = Object.entries(caps).map(([cat, cap]) => {
+    const spent = byCat[cat] || 0;
+    const pct = cap > 0 ? Math.min(100, spent/cap*100) : 0;
+    const over = spent > cap;
+    const color = over ? 'var(--red)' : pct > 80 ? 'var(--gold)' : 'var(--green)';
+    return `<div class="card" style="padding:10px;${over ? 'border-color:rgba(255,80,0,0.4);' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;">${CAT_LABELS[cat]||cat}</span>
+        <span style="font-size:9px;color:var(--muted);">cap: $${cap}</span>
+      </div>
+      <div style="font-size:18px;font-weight:700;color:${color};margin:4px 0;">$${spent.toFixed(0)}</div>
+      <div style="height:4px;background:var(--input);border-radius:2px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;"></div>
+      </div>
+      <div style="font-size:9px;color:${over ? 'var(--red)' : 'var(--muted)'};margin-top:2px;">
+        ${over ? 'OVER by $'+(spent-cap).toFixed(0)+'!' : '$'+(cap-spent).toFixed(0)+' left'}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Today's expenses
+  const todayDiv = document.getElementById('todayExpenses');
+  const todayTotal = todayExp.reduce((s,e) => s+e.amt, 0);
+  document.getElementById('todayTotal').textContent = '$' + todayTotal.toFixed(0);
+  if (todayExp.length === 0) {
+    todayDiv.innerHTML = '<span style="color:var(--muted);">No expenses today. Saving $!</span>';
+  } else {
+    todayDiv.innerHTML = todayExp.map(e =>
+      `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(42,53,80,0.15);">
+        <span><span class="badge" style="background:${CAT_COLORS[e.cat]||'var(--muted)'};color:#000;font-size:8px;">${CAT_LABELS[e.cat]||e.cat}</span> ${e.what||''}</span>
+        <span style="font-weight:600;">$${e.amt.toFixed(2)}</span>
+      </div>`
+    ).join('');
+  }
+
+  // Month label and total
+  document.getElementById('expMonthLabel').textContent = `${monthNames[expViewMonth]} ${expViewYear}`;
+  const monthTotal = monthExp.reduce((s,e) => s+e.amt, 0);
+  document.getElementById('monthExpTotal').textContent = '$' + monthTotal.toFixed(0);
+
+  // Month expense table
+  const body = document.getElementById('expBody');
+  if (monthExp.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">No expenses this month.</td></tr>';
+  } else {
+    body.innerHTML = monthExp.map(e => `<tr>
+      <td style="color:var(--sub);">${fmtDate(e.date)}</td>
+      <td><span class="badge" style="background:${CAT_COLORS[e.cat]||'var(--muted)'};color:#000;font-size:9px;">${CAT_LABELS[e.cat]||e.cat}</span></td>
+      <td style="font-weight:600;">$${e.amt.toFixed(2)}</td>
+      <td style="color:var(--sub);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.what||''}</td>
+      <td><button class="btn-sm btn-del" onclick="delExpense(${e.id})">x</button></td>
+    </tr>`).join('');
+  }
+
+  // Savings summary
+  const totalCap = Object.values(caps).reduce((s,v) => s+v, 0);
+  const fixedExp = 2212; // rent + car + utilities
+  const income = parseFloat(document.getElementById('bIncome')?.value) || 7400;
+  const budgetedVariable = totalCap;
+  const actualVariable = monthTotal;
+  const actualSavings = income - fixedExp - actualVariable;
+  const budgetedSavings = income - fixedExp - budgetedVariable;
+  const diff = actualSavings - budgetedSavings;
+
+  document.getElementById('expSavingSummary').innerHTML = `
+    <div class="lbl">Monthly Savings Snapshot — ${monthNames[expViewMonth]}</div>
+    <div class="grid g4" style="margin-top:8px;">
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Income</div>
+        <div style="font-size:16px;font-weight:700;">$${income.toLocaleString()}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Fixed</div>
+        <div style="font-size:16px;font-weight:700;color:var(--red);">-$${fixedExp.toLocaleString()}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Variable Spent</div>
+        <div style="font-size:16px;font-weight:700;color:${actualVariable > budgetedVariable ? 'var(--red)' : 'var(--green)'};">-$${actualVariable.toFixed(0)}</div>
+        <div style="font-size:9px;color:var(--muted);">Budget: $${budgetedVariable}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--muted);">Actual Savings</div>
+        <div style="font-size:16px;font-weight:700;color:${actualSavings >= budgetedSavings ? 'var(--green)' : 'var(--red)'};">$${actualSavings.toFixed(0)}</div>
+        <div style="font-size:9px;color:${diff >= 0 ? 'var(--green)' : 'var(--red)'};">${diff >= 0 ? '+' : ''}$${diff.toFixed(0)} vs budget</div>
+      </div>
+    </div>
+    ${actualVariable > budgetedVariable ? `<div style="margin-top:8px;padding:6px 10px;background:var(--rd);border-radius:6px;font-size:10px;color:var(--red);">Over budget by $${(actualVariable-budgetedVariable).toFixed(0)}! Cut back to save $${budgetedSavings.toFixed(0)} this month.</div>` : actualVariable > 0 ? `<div style="margin-top:8px;padding:6px 10px;background:var(--gd);border-radius:6px;font-size:10px;color:var(--green);">Under budget by $${(budgetedVariable-actualVariable).toFixed(0)}. On track for $${actualSavings.toFixed(0)} savings this month!</div>` : ''}
+  `;
+}
+
+// ═══════════════════════════════════════
+// PAYMENTS (debt/gold)
+// ═══════════════════════════════════════
+
 // Set default date
 document.getElementById('payDate').valueAsDate = new Date();
 
@@ -349,6 +619,7 @@ function delPayment(id) {
 function render() {
   renderProgress();
   renderPayments();
+  renderExpenses();
   renderBudget();
   renderTimeline();
   calcGold();
