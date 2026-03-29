@@ -2,7 +2,7 @@
   "name": "Trade Journal",
   "short_name": "TradeJournal",
   "description": "Robinhood Portfolio Tracker — Trade Journal, Recovery Tracker",
-  "start_url": "/robinhood-tracker/trades.html",
+  "start_url": "/TRACKER/trades.html",
   "display": "standalone",
   "background_color": "#0a0e1a",
   "theme_color": "#fec925",
