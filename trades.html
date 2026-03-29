@@ -100,7 +100,7 @@ tr:hover td{background:rgba(255,255,255,0.01);}
 <div class="mx">
 
 <h1>Trade <span>Journal</span></h1>
-<p class="subtitle">Daily tracker — Recovery goal: $8,310 from options losses</p>
+<p class="subtitle">Phase 1: Recover $8,310 options loss → Phase 2: Earn $125/day, 4 days/week</p>
 
 <!-- Daily Quote/Reminder -->
 <div class="quote" id="dailyQuote"></div>
@@ -118,6 +118,37 @@ tr:hover td{background:rgba(255,255,255,0.01);}
     <span>$0</span>
     <span id="projDate">Target: ~Aug 2026</span>
     <span>$8,310</span>
+  </div>
+</div>
+
+<!-- ══ EARNING PHASE (shows after recovery) ══ -->
+<div id="earningSection" style="display:none;">
+  <div class="recovery-bar" style="margin-bottom:12px;">
+    <div class="rb-header">
+      <span class="title" style="color:var(--green);">Earning Phase — $125/day target</span>
+      <span class="amt pos" id="earningAmt">$0</span>
+    </div>
+    <div class="rb-track">
+      <div class="rb-fill" id="earningFill" style="width:0%;background:linear-gradient(90deg,var(--green),#10b981);">0%</div>
+    </div>
+    <div class="rb-labels">
+      <span id="earningStart">Since recovery</span>
+      <span id="earningAvg">Avg: $0/day</span>
+      <span id="earningTarget">Target: $125/day</span>
+    </div>
+  </div>
+
+  <div class="grid g4" id="earningStats">
+    <div class="card c"><div class="lbl">Post-Recovery P&L</div><div class="val pos" style="font-size:16px;" id="earnTotal">$0</div></div>
+    <div class="card c"><div class="lbl">Trading Days</div><div class="val" style="font-size:16px;" id="earnDays">0</div></div>
+    <div class="card c"><div class="lbl">Daily Avg</div><div class="val" style="font-size:16px;" id="earnDailyAvg">$0</div><div class="sm" id="earnDailyStatus">Target: $125</div></div>
+    <div class="card c"><div class="lbl">Weekly Avg</div><div class="val" style="font-size:16px;" id="earnWeeklyAvg">$0</div><div class="sm">Target: $500/wk</div></div>
+  </div>
+
+  <!-- Monthly earnings table -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="lbl">Monthly Earnings (Post-Recovery)</div>
+    <div id="earningMonthly" style="margin-top:6px;"></div>
   </div>
 </div>
 
@@ -401,28 +432,131 @@ function renderStats() {
 function renderRecovery() {
   const totalPnl = sum(trades);
   const recovered = Math.max(0, totalPnl);
+  const isRecovered = totalPnl >= RECOVERY_TARGET;
   const pct = Math.min(100, (recovered / RECOVERY_TARGET * 100));
 
   document.getElementById('recoveredAmt').textContent = `${fmtPnl(recovered)} / $${RECOVERY_TARGET.toLocaleString()}`;
-  document.getElementById('recoveredAmt').className = 'amt ' + (recovered >= RECOVERY_TARGET ? 'pos' : 'gld');
+  document.getElementById('recoveredAmt').className = 'amt ' + (isRecovered ? 'pos' : 'gld');
 
   const fill = document.getElementById('recoveryFill');
   fill.style.width = Math.max(pct, 2) + '%';
   fill.textContent = pct.toFixed(1) + '%';
 
-  if (pct >= 100) {
+  if (isRecovered) {
     fill.style.background = 'var(--green)';
     fill.textContent = 'RECOVERED!';
   }
 
   // Project date
-  if (trades.length >= 3) {
+  if (trades.length >= 3 && !isRecovered) {
     const avgDaily = totalPnl / trades.length;
     if (avgDaily > 0) {
       const daysLeft = Math.ceil((RECOVERY_TARGET - recovered) / avgDaily);
       const target = new Date();
-      target.setDate(target.getDate() + Math.ceil(daysLeft * 7 / 4)); // 4 trading days/week
+      target.setDate(target.getDate() + Math.ceil(daysLeft * 7 / 4));
       document.getElementById('projDate').textContent = `Projected: ${target.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+    }
+  } else if (isRecovered) {
+    document.getElementById('projDate').textContent = 'DONE!';
+  }
+
+  // Show/hide earning section
+  renderEarning(isRecovered, totalPnl);
+}
+
+// ── Earning Phase (after recovery) ──
+function renderEarning(isRecovered, totalPnl) {
+  const section = document.getElementById('earningSection');
+  if (!isRecovered) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  const DAILY_TARGET = 125;
+  const WEEKLY_TARGET = 500;
+
+  // Find the trade that crossed recovery threshold
+  let runningPnl = 0;
+  let recoveryDate = null;
+  const sortedAsc = [...trades].sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+
+  for (const t of sortedAsc) {
+    runningPnl += t.pnl;
+    if (runningPnl >= RECOVERY_TARGET && !recoveryDate) {
+      recoveryDate = t.date;
+      break;
+    }
+  }
+
+  // Post-recovery trades
+  const postTrades = recoveryDate ? trades.filter(t => t.date > recoveryDate || (t.date === recoveryDate && runningPnl >= RECOVERY_TARGET)) : [];
+  // Actually: all earnings above recovery target
+  const postEarnings = totalPnl - RECOVERY_TARGET;
+  const postDays = new Set(postTrades.map(t => t.date)).size || 1;
+
+  const dailyAvg = postTrades.length > 0 ? postEarnings / postDays : 0;
+  const weeklyAvg = dailyAvg * 4; // 4 trading days/week
+
+  // Earning progress bar (target = daily avg >= $125)
+  const dailyPct = Math.min(100, Math.max(0, (dailyAvg / DAILY_TARGET) * 100));
+  const earnFill = document.getElementById('earningFill');
+  earnFill.style.width = Math.max(dailyPct, 2) + '%';
+  earnFill.textContent = dailyPct >= 100 ? 'ON TARGET!' : dailyPct.toFixed(0) + '%';
+  if (dailyPct >= 100) earnFill.style.background = 'var(--green)';
+  else if (dailyPct >= 70) earnFill.style.background = 'linear-gradient(90deg,var(--gold),var(--green))';
+  else earnFill.style.background = 'linear-gradient(90deg,var(--red),var(--gold))';
+
+  document.getElementById('earningAmt').textContent = fmtPnl(postEarnings);
+  document.getElementById('earningStart').textContent = recoveryDate ? `Since ${formatDate(recoveryDate)}` : '';
+  document.getElementById('earningAvg').textContent = `Avg: $${dailyAvg.toFixed(0)}/day`;
+
+  // Stats
+  setEl('earnTotal', fmtPnl(postEarnings), postEarnings >= 0 ? 'val pos' : 'val neg');
+  document.getElementById('earnDays').textContent = postDays;
+  document.getElementById('earnDailyAvg').textContent = '$' + dailyAvg.toFixed(0);
+  document.getElementById('earnDailyAvg').className = 'val ' + (dailyAvg >= DAILY_TARGET ? 'pos' : dailyAvg > 0 ? 'gld' : 'neg');
+  document.getElementById('earnDailyStatus').textContent = dailyAvg >= DAILY_TARGET ? 'On target!' : `$${Math.max(0, DAILY_TARGET - dailyAvg).toFixed(0)} below target`;
+  document.getElementById('earnDailyStatus').style.color = dailyAvg >= DAILY_TARGET ? 'var(--green)' : 'var(--red)';
+  document.getElementById('earnWeeklyAvg').textContent = '$' + weeklyAvg.toFixed(0);
+  document.getElementById('earnWeeklyAvg').className = 'val ' + (weeklyAvg >= WEEKLY_TARGET ? 'pos' : 'gld');
+
+  // Monthly earnings breakdown
+  if (postTrades.length > 0) {
+    const byMonth = {};
+    let cumPnl = 0;
+    // Re-sort post-recovery trades by date
+    const postSorted = [...postTrades].sort((a, b) => a.date.localeCompare(b.date));
+    const surplusByMonth = {};
+
+    // Calculate surplus per trade (amount above recovery)
+    let running = 0;
+    for (const t of sortedAsc) {
+      running += t.pnl;
+      if (running > RECOVERY_TARGET) {
+        const surplus = t.pnl - Math.max(0, RECOVERY_TARGET - (running - t.pnl));
+        const m = t.date.slice(0, 7);
+        if (!surplusByMonth[m]) surplusByMonth[m] = { pnl: 0, trades: 0, days: new Set() };
+        surplusByMonth[m].pnl += surplus;
+        surplusByMonth[m].trades++;
+        surplusByMonth[m].days.add(t.date);
+      }
+    }
+
+    const monthEl = document.getElementById('earningMonthly');
+    const monthEntries = Object.entries(surplusByMonth).sort((a, b) => b[0].localeCompare(a[0]));
+    if (monthEntries.length > 0) {
+      monthEl.innerHTML = monthEntries.map(([m, d]) => {
+        const daysCount = d.days.size;
+        const dAvg = daysCount > 0 ? d.pnl / daysCount : 0;
+        const onTrack = dAvg >= DAILY_TARGET;
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(42,53,80,0.2);font-size:11px;">
+          <span style="font-weight:600;">${m}</span>
+          <span style="color:var(--muted);">${d.trades} trades / ${daysCount} days</span>
+          <span style="color:var(--muted);">$${dAvg.toFixed(0)}/day</span>
+          <span class="${d.pnl >= 0 ? 'pos' : 'neg'}" style="font-weight:700;">${fmtPnl(d.pnl)}</span>
+          <span class="badge ${onTrack ? 'bg' : 'br'}">${onTrack ? 'On Target' : 'Below'}</span>
+        </div>`;
+      }).join('');
+    } else {
+      monthEl.innerHTML = '<span style="color:var(--muted);font-size:11px;">Keep trading — monthly breakdown appears here.</span>';
     }
   }
 }
