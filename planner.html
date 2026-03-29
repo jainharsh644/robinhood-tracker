@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0e1a">
+<title>Money Planner — Smart Allocation</title>
+<style>
+:root{--bg:#0a0e1a;--card:#1a2235;--border:#2a3550;--input:#0f1629;--green:#00c805;--gd:rgba(0,200,5,0.1);--red:#ff5000;--rd:rgba(255,80,0,0.1);--gold:#fec925;--yd:rgba(254,201,37,0.12);--blue:#3b82f6;--bd:rgba(59,130,246,0.1);--purple:#a855f7;--pd:rgba(168,85,247,0.1);--cyan:#06b6d4;--text:#e2e8f0;--sub:#94a3b8;--muted:#64748b;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.mx{max-width:960px;margin:0 auto;padding:12px;}
+h1{font-size:20px;font-weight:700;text-align:center;margin-bottom:2px;} h1 span{color:var(--gold);}
+.sub-h{text-align:center;font-size:10px;color:var(--muted);margin-bottom:14px;}
+.grid{display:grid;gap:8px;margin-bottom:12px;}
+.g2{grid-template-columns:1fr 1fr;}.g3{grid-template-columns:repeat(3,1fr);}.g4{grid-template-columns:repeat(4,1fr);}.g5{grid-template-columns:repeat(5,1fr);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.card.c{text-align:center;}
+.lbl{font-size:8px;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);font-weight:600;margin-bottom:3px;}
+.val{font-size:18px;font-weight:700;}
+.sm{font-size:9px;color:var(--sub);margin-top:2px;}
+.pos{color:var(--green);}.neg{color:var(--red);}.gld{color:var(--gold);}
+.sec{margin-bottom:14px;}
+.sec-t{font-size:12px;font-weight:700;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.badge{font-size:9px;font-weight:600;padding:2px 7px;border-radius:8px;}
+.bg{background:var(--gd);color:var(--green);}.br{background:var(--rd);color:var(--red);}.by{background:var(--yd);color:var(--gold);}.bb{background:var(--bd);color:var(--blue);}.bp{background:var(--pd);color:var(--purple);}
+.tabs{display:flex;gap:4px;margin-bottom:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab{padding:6px 12px;border-radius:6px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--sub);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.tab:hover{border-color:var(--gold);color:var(--gold);}
+.tab.active{background:var(--yd);border-color:var(--gold);color:var(--gold);}
+.pane{display:none;}.pane.active{display:block;}
+.alloc{display:flex;height:20px;border-radius:8px;overflow:hidden;margin:6px 0;}
+.alloc div{display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#000;min-width:0;overflow:hidden;}
+.al{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.al span{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--sub);}
+.al .dot{width:7px;height:7px;border-radius:2px;}
+.prg-track{height:6px;background:var(--input);border-radius:3px;overflow:hidden;margin-top:4px;}
+.prg-fill{height:100%;border-radius:3px;transition:width 0.4s;}
+table{width:100%;border-collapse:collapse;font-size:10px;}
+th{text-align:left;padding:5px 8px;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);}
+td{padding:5px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
+.row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(42,53,80,0.15);font-size:11px;}
+.row:last-child{border-bottom:none;}
+.row .n{color:var(--sub);flex:1;}.row .v{font-weight:600;width:70px;text-align:right;}
+.ff{display:flex;flex-direction:column;gap:3px;}
+.ff label{font-size:8px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);font-weight:600;}
+.ff input,.ff select{background:var(--input);border:1px solid var(--border);border-radius:5px;padding:7px 9px;color:var(--text);font-size:13px;outline:none;font-family:inherit;-webkit-appearance:none;}
+.ff input:focus{border-color:var(--gold);}
+.form-row{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.warn{background:var(--yd);border-radius:6px;padding:8px 10px;font-size:10px;color:var(--gold);margin-top:6px;line-height:1.5;}
+.tip{background:var(--gd);border-radius:6px;padding:8px 10px;font-size:10px;color:var(--green);margin-top:6px;line-height:1.5;}
+@media(max-width:768px){
+  .g3,.g4,.g5{grid-template-columns:repeat(2,1fr);}
+  .form-row{flex-direction:column;gap:6px;}
+  .ff{width:100%!important;flex:none!important;}
+  .tabs{gap:6px;} .tab{padding:7px 12px;}
+}
+@media(max-width:400px){.g2{grid-template-columns:1fr;}}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="mx">
+
+<h1>Money <span>Planner</span></h1>
+<p class="sub-h">$7,000/month — Smart allocation for wealth building</p>
+
+<!-- ══ SALARY FLOW ══ -->
+<div class="sec">
+  <div class="sec-t">Monthly Salary Allocation <span class="badge by">$7,000</span></div>
+  <div class="alloc" id="allocBar"></div>
+  <div class="al" id="allocLegend"></div>
+</div>
+
+<!-- ══ SNAPSHOT ══ -->
+<div class="grid g5">
+  <div class="card c"><div class="lbl">Net Worth</div><div class="val gld" style="font-size:15px;" id="netWorth">$34,500</div></div>
+  <div class="card c"><div class="lbl">Savings</div><div class="val" style="font-size:15px;">$10,000</div><div class="sm">Emergency</div></div>
+  <div class="card c"><div class="lbl">Stocks</div><div class="val" style="font-size:15px;color:var(--blue);">$22,000</div><div class="sm">Robinhood</div></div>
+  <div class="card c"><div class="lbl">Savings Rate</div><div class="val pos" style="font-size:15px;" id="savingsRate">38%</div></div>
+  <div class="card c"><div class="lbl">Options Capital</div><div class="val" style="font-size:15px;color:var(--purple);">$1,500</div><div class="sm">Fixed</div></div>
+</div>
+
+<!-- ══ TABS ══ -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('allocation',this)">Allocation</button>
+  <button class="tab" onclick="showTab('sip',this)">SIP & Investments</button>
+  <button class="tab" onclick="showTab('options',this)">Options Plan</button>
+  <button class="tab" onclick="showTab('projections',this)">Projections</button>
+  <button class="tab" onclick="showTab('rules',this)">Rules</button>
+</div>
+
+<!-- ══ ALLOCATION TAB ══ -->
+<div class="pane active" id="allocation">
+  <div class="card">
+    <div class="lbl">Where Every Dollar Goes</div>
+    <div id="allocDetails"></div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;">
+      <span>Total Allocated:</span><span class="gld" style="font-weight:700;" id="totalAlloc">$7,000</span>
+    </div>
+  </div>
+
+  <!-- Emergency fund progress -->
+  <div class="card" style="margin-top:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="lbl" style="margin:0;">Emergency Fund</div>
+      <span style="font-size:11px;font-weight:600;" id="emerTarget">$10,000 / $13,500</span>
+    </div>
+    <div class="prg-track" style="height:8px;">
+      <div class="prg-fill" style="width:74%;background:var(--green);" id="emerFill"></div>
+    </div>
+    <div class="sm" id="emerStatus">$500/month → Full in 7 months. Then redirect to investments.</div>
+  </div>
+
+  <!-- Editable allocations -->
+  <div class="card" style="margin-top:8px;cursor:pointer;" onclick="document.getElementById('editAlloc').style.display=document.getElementById('editAlloc').style.display==='none'?'block':'none';">
+    <div style="display:flex;justify-content:space-between;"><span class="lbl" style="margin:0;">Customize Allocation</span><span style="font-size:10px;color:var(--muted);">tap to edit</span></div>
+    <div id="editAlloc" style="display:none;margin-top:8px;" onclick="event.stopPropagation();">
+      <div class="form-row">
+        <div class="ff" style="flex:1;"><label>Income</label><input type="number" id="pIncome" value="7000" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Rent</label><input type="number" id="pRent" value="967" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Car+Insurance</label><input type="number" id="pCar" value="450" onchange="recalc()" /></div>
+      </div>
+      <div class="form-row">
+        <div class="ff" style="flex:1;"><label>Groceries</label><input type="number" id="pGrocery" value="250" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Dining</label><input type="number" id="pDining" value="50" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Utilities+Phone</label><input type="number" id="pUtil" value="40" onchange="recalc()" /></div>
+      </div>
+      <div class="form-row">
+        <div class="ff" style="flex:1;"><label>Subscriptions</label><input type="number" id="pSubs" value="30" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Gas</label><input type="number" id="pGas" value="40" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Personal</label><input type="number" id="pPersonal" value="15" onchange="recalc()" /></div>
+      </div>
+      <div class="form-row">
+        <div class="ff" style="flex:1;"><label>Family Transfers</label><input type="number" id="pFamily" value="400" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Emergency Savings</label><input type="number" id="pEmergency" value="500" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Investments (SIP)</label><input type="number" id="pInvest" value="2000" onchange="recalc()" /></div>
+      </div>
+      <div class="form-row">
+        <div class="ff" style="flex:1;"><label>Honda Extra Payment</label><input type="number" id="pHonda" value="750" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Fun/Shopping</label><input type="number" id="pFun" value="500" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Current Savings</label><input type="number" id="pCurrentSav" value="10000" onchange="recalc()" /></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SIP & INVESTMENTS TAB ══ -->
+<div class="pane" id="sip">
+  <div class="sec-t">Monthly SIP Plan — $2,000 <span class="badge bb">Auto-invest on 1st</span></div>
+
+  <div class="grid g4">
+    <div class="card c" style="border-color:rgba(59,130,246,0.3);">
+      <div class="lbl">S&P 500 (VOO)</div>
+      <div class="val" style="font-size:18px;color:var(--blue);">$800</div>
+      <div class="sm">40% of SIP</div>
+      <div class="prg-track"><div class="prg-fill" style="width:40%;background:var(--blue);"></div></div>
+      <div class="sm">10-12% avg annual return</div>
+    </div>
+    <div class="card c" style="border-color:rgba(0,200,5,0.3);">
+      <div class="lbl">Growth Stocks</div>
+      <div class="val" style="font-size:18px;color:var(--green);">$400</div>
+      <div class="sm">20% of SIP</div>
+      <div class="prg-track"><div class="prg-fill" style="width:20%;background:var(--green);"></div></div>
+      <div class="sm">NVDA, AMZN, GOOGL, MSFT</div>
+    </div>
+    <div class="card c" style="border-color:rgba(168,85,247,0.3);">
+      <div class="lbl">India ETF (INDA)</div>
+      <div class="val" style="font-size:18px;color:var(--purple);">$400</div>
+      <div class="sm">20% of SIP</div>
+      <div class="prg-track"><div class="prg-fill" style="width:20%;background:var(--purple);"></div></div>
+      <div class="sm">India GDP 6-7% growth</div>
+    </div>
+    <div class="card c" style="border-color:rgba(254,201,37,0.3);">
+      <div class="lbl">Gold (GLD/SGOL)</div>
+      <div class="val" style="font-size:18px;color:var(--gold);">$400</div>
+      <div class="sm">20% of SIP</div>
+      <div class="prg-track"><div class="prg-fill" style="width:20%;background:var(--gold);"></div></div>
+      <div class="sm">Hedge + long-term store</div>
+    </div>
+  </div>
+
+  <div class="tip">Set up auto-invest on Robinhood/Fidelity for the 1st of every month. Money moves before you can spend it. Dollar-cost averaging beats timing 90% of the time.</div>
+
+  <!-- SIP tracker -->
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl">SIP Growth Projection</div>
+    <table style="margin-top:6px;">
+      <thead><tr><th>Period</th><th>Invested</th><th>At 10%</th><th>At 12%</th><th>Gain</th></tr></thead>
+      <tbody id="sipTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Existing stocks rebalance -->
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl">Current $22K Stocks — Suggested Rebalance</div>
+    <div class="warn" style="margin-top:4px;">Your current holdings (SMCI, RIVN, SOUN, SOFI, BBAI) are speculative and concentrated. Once they recover, gradually rebalance:</div>
+    <div style="margin-top:6px;">
+      <div class="row"><span class="n">VOO (S&P 500)</span><span class="v" style="color:var(--blue);">60%</span></div>
+      <div class="row"><span class="n">Growth (NVDA, AMZN, etc.)</span><span class="v" style="color:var(--green);">20%</span></div>
+      <div class="row"><span class="n">INDA (India)</span><span class="v" style="color:var(--purple);">10%</span></div>
+      <div class="row"><span class="n">GLD (Gold)</span><span class="v" style="color:var(--gold);">10%</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OPTIONS PLAN TAB ══ -->
+<div class="pane" id="options">
+  <div class="sec-t">Options Trading Plan <span class="badge bp">$1,500 capital</span></div>
+
+  <div class="card">
+    <div class="lbl">Your Strategy</div>
+    <div style="margin-top:6px;">
+      <div class="row"><span class="n">Lots per trade</span><span class="v">5</span></div>
+      <div class="row"><span class="n">Target per lot</span><span class="v">$0.25</span></div>
+      <div class="row"><span class="n">Daily target</span><span class="v pos">$125</span></div>
+      <div class="row"><span class="n">Weekly target (4 days)</span><span class="v pos">$500</span></div>
+      <div class="row"><span class="n">Capital allocated</span><span class="v">$1,000</span></div>
+      <div class="row"><span class="n">Backup capital</span><span class="v">$500</span></div>
+    </div>
+  </div>
+
+  <!-- Realistic scenarios -->
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl">Realistic Monthly Outcomes</div>
+    <table style="margin-top:6px;">
+      <thead><tr><th>Month Type</th><th>Win Rate</th><th>P&L</th><th>Probability</th></tr></thead>
+      <tbody>
+        <tr><td class="pos" style="font-weight:600;">Great</td><td>70%</td><td class="pos" style="font-weight:700;">+$1,375</td><td>20%</td></tr>
+        <tr><td class="gld" style="font-weight:600;">Good</td><td>60%</td><td class="pos" style="font-weight:700;">+$800</td><td>30%</td></tr>
+        <tr><td style="font-weight:600;">Average</td><td>55%</td><td class="pos" style="font-weight:700;">+$550</td><td>25%</td></tr>
+        <tr><td class="neg" style="font-weight:600;">Bad</td><td>40%</td><td class="neg" style="font-weight:700;">-$275</td><td>15%</td></tr>
+        <tr><td class="neg" style="font-weight:600;">Terrible</td><td>25%</td><td class="neg" style="font-weight:700;">-$800</td><td>10%</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:11px;">
+      <span style="color:var(--muted);">Expected monthly avg:</span>
+      <span class="pos" style="font-weight:700;">+$528</span>
+      <span style="color:var(--muted);">(probability-weighted)</span>
+    </div>
+  </div>
+
+  <!-- Risk rules -->
+  <div class="card" style="margin-top:8px;border-color:rgba(255,80,0,0.3);">
+    <div class="lbl" style="color:var(--red);">Risk Rules — Non-Negotiable</div>
+    <div style="margin-top:6px;font-size:11px;line-height:1.8;color:var(--sub);">
+      <div>1. <b style="color:var(--red);">Daily stop-loss: -$150.</b> Hit it = walk away. No revenge trades.</div>
+      <div>2. <b style="color:var(--red);">Weekly cap: -$400.</b> Down $400 in a week = stop for the week.</div>
+      <div>3. <b style="color:var(--red);">Never add to the $1,500.</b> If it drops to $500, stop and reassess.</div>
+      <div>4. <b style="color:var(--gold);">Profits → investments.</b> Options wins go to SIP, not back to trading.</div>
+      <div>5. <b style="color:var(--gold);">3 green months → increase to 7-8 lots.</b> 2 red months → drop to 3 lots.</div>
+      <div>6. <b style="color:var(--green);">Options capital is separate.</b> Never dip into investment money.</div>
+    </div>
+  </div>
+
+  <!-- Options profit destination -->
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl">Where Options Profits Go</div>
+    <div style="margin-top:6px;">
+      <div class="row"><span class="n">First $8,310</span><span class="v neg">Recovery</span></div>
+      <div class="row"><span class="n">After recovery: 50%</span><span class="v" style="color:var(--blue);">→ VOO SIP</span></div>
+      <div class="row"><span class="n">After recovery: 30%</span><span class="v" style="color:var(--green);">→ Growth stocks</span></div>
+      <div class="row"><span class="n">After recovery: 20%</span><span class="v" style="color:var(--gold);">→ Gold</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROJECTIONS TAB ══ -->
+<div class="pane" id="projections">
+  <div class="sec-t">Wealth Projections</div>
+
+  <!-- Combined projection -->
+  <div class="card">
+    <div class="lbl">Total Portfolio Growth (Existing $22K + $2K/month SIP)</div>
+    <table style="margin-top:6px;">
+      <thead><tr><th>Year</th><th>Invested</th><th>At 10%</th><th>At 12%</th><th>At 15%</th></tr></thead>
+      <tbody id="projTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Options income projection -->
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl">Options Trading Income (Conservative: $500/month avg)</div>
+    <table style="margin-top:6px;">
+      <thead><tr><th>Period</th><th>Cumulative</th><th>If Reinvested at 10%</th></tr></thead>
+      <tbody>
+        <tr><td>6 months</td><td>$3,000</td><td>$3,150</td></tr>
+        <tr><td>1 year</td><td>$6,000</td><td>$6,600</td></tr>
+        <tr><td>2 years</td><td>$12,000</td><td>$14,520</td></tr>
+        <tr><td>3 years</td><td>$18,000</td><td>$24,150</td></tr>
+        <tr><td>5 years</td><td>$30,000</td><td>$46,500</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Net worth timeline -->
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl">Net Worth Timeline (All Sources)</div>
+    <div style="font-size:10px;color:var(--muted);margin:4px 0;">Salary savings + SIP growth + Options income + Existing assets</div>
+    <div id="nwTimeline"></div>
+  </div>
+</div>
+
+<!-- ══ RULES TAB ══ -->
+<div class="pane" id="rules">
+  <div class="sec-t">Financial Rules</div>
+
+  <div class="card">
+    <div class="lbl" style="color:var(--gold);">The System</div>
+    <div style="font-size:11px;line-height:2;color:var(--sub);margin-top:6px;">
+      <div>1. <b style="color:var(--text);">Automate SIPs on the 1st.</b> Money moves before you can spend it.</div>
+      <div>2. <b style="color:var(--text);">Emergency fund = 6 months.</b> $13,500 target. Don't touch for anything else.</div>
+      <div>3. <b style="color:var(--text);">Options capital is fixed at $1,500.</b> Wins go to investments. Losses stay in options.</div>
+      <div>4. <b style="color:var(--text);">Never invest money you need in 2 years.</b> Short-term = savings account, long-term = market.</div>
+      <div>5. <b style="color:var(--text);">Shopping budget: $500/month max.</b> Big purchases only during sales. No impulse buys.</div>
+      <div>6. <b style="color:var(--text);">Family transfers: fixed $400/month.</b> Negotiate if needed, don't let it creep.</div>
+      <div>7. <b style="color:var(--text);">Review portfolio monthly.</b> Rebalance quarterly. Don't check daily.</div>
+      <div>8. <b style="color:var(--text);">Subscriptions audit every 3 months.</b> Cancel what you don't use.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl" style="color:var(--green);">Quick Wins From Your Spending Data</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--sub);margin-top:6px;">
+      <div><b>Subscriptions:</b> Audit ChatGPT Plus, Uber One, WHOP — cancel unused. Save ~$15/month</div>
+      <div><b>Shopping:</b> Nov-Dec 2025 had ~$3,500 in fashion. Budget $100/month, big buys only on sales</div>
+      <div><b>Zelle:</b> $17K in P2P transfers is large. Review which are necessary vs discretionary</div>
+      <div><b>Dining:</b> Already lean at $60/month. Keep it up</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:8px;">
+    <div class="lbl" style="color:var(--blue);">Investment Rules</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--sub);margin-top:6px;">
+      <div><b>VOO is the backbone.</b> 40%+ of every dollar invested goes to S&P 500.</div>
+      <div><b>Growth stocks: max 5 names.</b> NVDA, AMZN, GOOGL, MSFT, META. Buy on dips only.</div>
+      <div><b>India ETF: long-term hold.</b> Don't sell on short-term dips. GDP growth is structural.</div>
+      <div><b>Gold: 10-15% max.</b> Hedge, not a growth engine. Don't chase ATH.</div>
+      <div><b>Current speculative stocks:</b> Sell as they recover. Don't add. Rotate into VOO.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const ALLOC_ITEMS = [
+  { key:'rent', label:'Rent', color:'#ef4444' },
+  { key:'car', label:'Car+Insurance', color:'var(--purple)' },
+  { key:'grocery', label:'Groceries', color:'var(--green)' },
+  { key:'dining', label:'Dining', color:'var(--gold)' },
+  { key:'util', label:'Utilities', color:'var(--blue)' },
+  { key:'subs', label:'Subs', color:'var(--cyan)' },
+  { key:'gas', label:'Gas', color:'#8b5cf6' },
+  { key:'personal', label:'Personal', color:'var(--muted)' },
+  { key:'family', label:'Family', color:'#f97316' },
+  { key:'emergency', label:'Emergency', color:'#ef4444' },
+  { key:'invest', label:'Investments', color:'var(--blue)' },
+  { key:'honda', label:'Honda Extra', color:'var(--purple)' },
+  { key:'fun', label:'Fun/Shopping', color:'var(--gold)' },
+];
+
+const FIELD_MAP = {
+  rent:'pRent', car:'pCar', grocery:'pGrocery', dining:'pDining',
+  util:'pUtil', subs:'pSubs', gas:'pGas', personal:'pPersonal',
+  family:'pFamily', emergency:'pEmergency', invest:'pInvest', honda:'pHonda', fun:'pFun'
+};
+
+function getVal(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+
+function recalc() {
+  const income = getVal('pIncome');
+  const items = ALLOC_ITEMS.map(a => ({
+    ...a,
+    amt: getVal(FIELD_MAP[a.key])
+  }));
+  const total = items.reduce((s,i) => s+i.amt, 0);
+  const buffer = income - total;
+
+  // Allocation bar
+  const bar = document.getElementById('allocBar');
+  bar.innerHTML = items.filter(i => i.amt > 0).map(i => {
+    const pct = (i.amt / income * 100);
+    return `<div style="width:${pct}%;background:${i.color};" title="${i.label}: $${i.amt}">${pct > 5 ? '$'+i.amt : ''}</div>`;
+  }).join('') + (buffer > 0 ? `<div style="width:${buffer/income*100}%;background:rgba(100,116,139,0.3);" title="Buffer: $${buffer}">$${buffer}</div>` : '');
+
+  // Legend
+  const legend = document.getElementById('allocLegend');
+  legend.innerHTML = items.filter(i => i.amt > 0).map(i =>
+    `<span><span class="dot" style="background:${i.color}"></span>${i.label} $${i.amt} (${(i.amt/income*100).toFixed(0)}%)</span>`
+  ).join('') + (buffer > 0 ? `<span><span class="dot" style="background:rgba(100,116,139,0.3)"></span>Buffer $${buffer}</span>` : '');
+
+  // Details
+  const details = document.getElementById('allocDetails');
+  const expenses = items.filter(i => ['rent','car','grocery','dining','util','subs','gas','personal','family'].includes(i.key));
+  const savings = items.filter(i => ['emergency','invest','honda','fun'].includes(i.key));
+  const expTotal = expenses.reduce((s,i) => s+i.amt, 0);
+  const savTotal = savings.reduce((s,i) => s+i.amt, 0);
+
+  details.innerHTML = `
+    <div style="font-size:10px;color:var(--muted);margin:4px 0;font-weight:600;">LIVING EXPENSES — $${expTotal.toLocaleString()}</div>
+    ${expenses.filter(i=>i.amt>0).map(i => `<div class="row"><span class="n"><span class="dot" style="background:${i.color};display:inline-block;width:6px;height:6px;border-radius:2px;margin-right:4px;"></span>${i.label}</span><span class="v">$${i.amt}</span></div>`).join('')}
+    <div style="font-size:10px;color:var(--muted);margin:8px 0 4px;font-weight:600;">SAVINGS & INVESTMENTS — $${savTotal.toLocaleString()}</div>
+    ${savings.filter(i=>i.amt>0).map(i => `<div class="row"><span class="n"><span class="dot" style="background:${i.color};display:inline-block;width:6px;height:6px;border-radius:2px;margin-right:4px;"></span>${i.label}</span><span class="v" style="color:var(--green);">$${i.amt}</span></div>`).join('')}
+    ${buffer > 0 ? `<div class="row"><span class="n">Buffer (unallocated)</span><span class="v" style="color:var(--muted);">$${buffer}</span></div>` : ''}
+  `;
+
+  document.getElementById('totalAlloc').textContent = `$${total.toLocaleString()}` + (buffer > 0 ? ` + $${buffer} buffer` : total > income ? ' (OVER!)' : '');
+  if (total > income) document.getElementById('totalAlloc').style.color = 'var(--red)';
+  else document.getElementById('totalAlloc').style.color = 'var(--gold)';
+
+  // Savings rate
+  document.getElementById('savingsRate').textContent = ((savTotal / income) * 100).toFixed(0) + '%';
+
+  // Emergency fund
+  const currentSav = getVal('pCurrentSav');
+  const emerTarget = 13500;
+  const emerPct = Math.min(100, currentSav / emerTarget * 100);
+  document.getElementById('emerTarget').textContent = `$${currentSav.toLocaleString()} / $${emerTarget.toLocaleString()}`;
+  document.getElementById('emerFill').style.width = emerPct + '%';
+  const monthsToFull = getVal('pEmergency') > 0 ? Math.ceil((emerTarget - currentSav) / getVal('pEmergency')) : 0;
+  document.getElementById('emerStatus').textContent = currentSav >= emerTarget
+    ? 'FULL! Redirect $500 to investments.'
+    : `$${getVal('pEmergency')}/month → Full in ${monthsToFull} months. Then redirect to investments.`;
+
+  renderSipTable();
+  renderProjections();
+}
+
+function renderSipTable() {
+  const monthly = getVal('pInvest');
+  const body = document.getElementById('sipTable');
+  const periods = [
+    { label: '6 months', m: 6 },
+    { label: '1 year', m: 12 },
+    { label: '2 years', m: 24 },
+    { label: '3 years', m: 36 },
+    { label: '5 years', m: 60 },
+    { label: '10 years', m: 120 },
+  ];
+
+  body.innerHTML = periods.map(p => {
+    const invested = monthly * p.m;
+    const at10 = fv(monthly, 0.10/12, p.m);
+    const at12 = fv(monthly, 0.12/12, p.m);
+    const gain = at12 - invested;
+    return `<tr>
+      <td style="font-weight:600;">${p.label}</td>
+      <td>$${invested.toLocaleString()}</td>
+      <td class="pos">$${Math.round(at10).toLocaleString()}</td>
+      <td class="pos" style="font-weight:700;">$${Math.round(at12).toLocaleString()}</td>
+      <td class="gld">+$${Math.round(gain).toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderProjections() {
+  const monthly = getVal('pInvest');
+  const existing = 22000;
+  const body = document.getElementById('projTable');
+  const years = [1, 2, 3, 5, 7, 10];
+
+  body.innerHTML = years.map(y => {
+    const m = y * 12;
+    const invested = existing + monthly * m;
+    const at10 = existing * Math.pow(1+0.10/12, m) + fv(monthly, 0.10/12, m);
+    const at12 = existing * Math.pow(1+0.12/12, m) + fv(monthly, 0.12/12, m);
+    const at15 = existing * Math.pow(1+0.15/12, m) + fv(monthly, 0.15/12, m);
+    return `<tr>
+      <td style="font-weight:600;">${y}yr</td>
+      <td>$${Math.round(invested).toLocaleString()}</td>
+      <td class="pos">$${Math.round(at10).toLocaleString()}</td>
+      <td class="pos" style="font-weight:700;">$${Math.round(at12).toLocaleString()}</td>
+      <td class="gld" style="font-weight:700;">$${Math.round(at15).toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  // Net worth timeline
+  const nw = document.getElementById('nwTimeline');
+  const optAvg = 500; // conservative monthly options income
+  const milestones = [
+    { y:1, label:'1 Year' }, { y:2, label:'2 Years' }, { y:3, label:'3 Years' }, { y:5, label:'5 Years' },
+  ];
+
+  nw.innerHTML = milestones.map(ms => {
+    const m = ms.y * 12;
+    const portfolio = existing * Math.pow(1+0.10/12, m) + fv(monthly, 0.10/12, m);
+    const optIncome = optAvg * m;
+    const savings = 10000 + (getVal('pEmergency') * Math.min(m, 7)); // caps at 6 months
+    const total = portfolio + optIncome + savings;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(42,53,80,0.2);">
+      <span style="font-weight:700;width:60px;">${ms.label}</span>
+      <div style="flex:1;">
+        <div style="display:flex;height:12px;border-radius:4px;overflow:hidden;">
+          <div style="width:${portfolio/total*100}%;background:var(--blue);" title="Portfolio"></div>
+          <div style="width:${optIncome/total*100}%;background:var(--purple);" title="Options"></div>
+          <div style="width:${savings/total*100}%;background:var(--green);" title="Savings"></div>
+        </div>
+      </div>
+      <span style="font-weight:700;color:var(--gold);width:80px;text-align:right;">$${Math.round(total).toLocaleString()}</span>
+    </div>`;
+  }).join('') + `<div class="al" style="margin-top:4px;">
+    <span><span class="dot" style="background:var(--blue)"></span>Portfolio</span>
+    <span><span class="dot" style="background:var(--purple)"></span>Options</span>
+    <span><span class="dot" style="background:var(--green)"></span>Savings</span>
+  </div>`;
+}
+
+// Future value of annuity
+function fv(pmt, r, n) {
+  if (r === 0) return pmt * n;
+  return pmt * ((Math.pow(1 + r, n) - 1) / r);
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+recalc();
+</script>
+</body>
+</html>
