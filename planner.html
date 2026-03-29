@@ -119,16 +119,16 @@ td{padding:5px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
     <div id="editAlloc" style="display:none;margin-top:8px;" onclick="event.stopPropagation();">
       <div class="form-row">
         <div class="ff" style="flex:1;"><label>Income</label><input type="number" id="pIncome" value="7000" onchange="recalc()" /></div>
-        <div class="ff" style="flex:1;"><label>Rent</label><input type="number" id="pRent" value="967" onchange="recalc()" /></div>
-        <div class="ff" style="flex:1;"><label>Car+Insurance</label><input type="number" id="pCar" value="450" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Rent</label><input type="number" id="pRent" value="1555" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Car EMI</label><input type="number" id="pCar" value="600" onchange="recalc()" /></div>
       </div>
       <div class="form-row">
-        <div class="ff" style="flex:1;"><label>Groceries</label><input type="number" id="pGrocery" value="250" onchange="recalc()" /></div>
-        <div class="ff" style="flex:1;"><label>Dining</label><input type="number" id="pDining" value="50" onchange="recalc()" /></div>
-        <div class="ff" style="flex:1;"><label>Utilities+Phone</label><input type="number" id="pUtil" value="40" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Food/Grocery</label><input type="number" id="pGrocery" value="400" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Outside Food</label><input type="number" id="pDining" value="100" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Utilities/Water</label><input type="number" id="pUtil" value="100" onchange="recalc()" /></div>
       </div>
       <div class="form-row">
-        <div class="ff" style="flex:1;"><label>Subscriptions</label><input type="number" id="pSubs" value="30" onchange="recalc()" /></div>
+        <div class="ff" style="flex:1;"><label>Wifi</label><input type="number" id="pSubs" value="55" onchange="recalc()" /></div>
         <div class="ff" style="flex:1;"><label>Gas</label><input type="number" id="pGas" value="40" onchange="recalc()" /></div>
         <div class="ff" style="flex:1;"><label>Personal</label><input type="number" id="pPersonal" value="15" onchange="recalc()" /></div>
       </div>
@@ -347,11 +347,11 @@ td{padding:5px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
 <script>
 const ALLOC_ITEMS = [
   { key:'rent', label:'Rent', color:'#ef4444' },
-  { key:'car', label:'Car+Insurance', color:'var(--purple)' },
-  { key:'grocery', label:'Groceries', color:'var(--green)' },
-  { key:'dining', label:'Dining', color:'var(--gold)' },
-  { key:'util', label:'Utilities', color:'var(--blue)' },
-  { key:'subs', label:'Subs', color:'var(--cyan)' },
+  { key:'car', label:'Car EMI', color:'var(--purple)' },
+  { key:'grocery', label:'Food/Grocery', color:'var(--green)' },
+  { key:'dining', label:'Outside Food', color:'var(--gold)' },
+  { key:'util', label:'Utilities/Water', color:'var(--blue)' },
+  { key:'subs', label:'Wifi', color:'var(--cyan)' },
   { key:'gas', label:'Gas', color:'#8b5cf6' },
   { key:'personal', label:'Personal', color:'var(--muted)' },
   { key:'family', label:'Family', color:'#f97316' },
