@@ -1,4 +1,4 @@
-const CACHE = 'trade-journal-v4';
+const CACHE = 'trade-journal-v5';
 const ASSETS = ['trades.html', 'index.html', 'signals.html', 'manifest.json'];
 
 self.addEventListener('install', e => {

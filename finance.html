@@ -288,7 +288,7 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
         <div class="ff" style="flex:1;"><label>Personal</label><input type="number" id="capPersonal" value="50" onchange="saveCaps()" /></div>
         <div class="ff" style="flex:1;"><label>Trips (monthly)</label><input type="number" id="capTrips" value="500" onchange="saveCaps()" /></div>
       </div>
-      <div class="sm" style="margin-top:4px;">Total variable cap: <span class="gld" id="totalCap">$0</span> | Fixed expenses (rent+car+utilities): <span>$2,212</span></div>
+      <div class="sm" style="margin-top:4px;">Total variable cap: <span class="gld" id="totalCap">$0</span> | Fixed (rent+car+wifi+util): <span id="fixedExpDisplay">varies by month</span></div>
     </div>
   </div>
 
@@ -364,14 +364,20 @@ td{padding:6px 8px;border-bottom:1px solid rgba(42,53,80,0.2);}
     </div>
   </div>
 
+  <!-- Rent schedule -->
+  <div class="card" style="margin-top:10px;">
+    <div class="lbl">Rent Schedule (varies by month)</div>
+    <div style="font-size:11px;margin-top:6px;" id="rentScheduleDisplay"></div>
+  </div>
+
   <!-- Edit budget -->
   <div class="form" style="margin-top:10px;">
     <div class="form-t">Adjust Budget</div>
     <div class="form-row">
-      <div class="ff" style="flex:1;"><label>Rent</label><input type="number" id="bRent" value="1525" onchange="updateBudget()" /></div>
       <div class="ff" style="flex:1;"><label>Car EMI</label><input type="number" id="bCar" value="587" onchange="updateBudget()" /></div>
+      <div class="ff" style="flex:1;"><label>Wifi</label><input type="number" id="bWifi" value="55" onchange="updateBudget()" /></div>
+      <div class="ff" style="flex:1;"><label>Utilities/Water</label><input type="number" id="bUtil" value="100" onchange="updateBudget()" /></div>
       <div class="ff" style="flex:1;"><label>Food</label><input type="number" id="bFood" value="225" onchange="updateBudget()" /></div>
-      <div class="ff" style="flex:1;"><label>Utilities</label><input type="number" id="bUtil" value="100" onchange="updateBudget()" /></div>
     </div>
     <div class="form-row">
       <div class="ff" style="flex:1;"><label>Trips/Shopping (annual)</label><input type="number" id="bTrips" value="6000" onchange="updateBudget()" /></div>
@@ -615,7 +621,8 @@ function renderExpenses() {
 
   // Savings summary
   const totalCap = Object.values(caps).reduce((s,v) => s+v, 0);
-  const fixedExp = 2212; // rent + car + utilities
+  const currentRent = getCurrentRent();
+  const fixedExp = currentRent + (parseFloat(document.getElementById('bCar')?.value)||587) + (parseFloat(document.getElementById('bWifi')?.value)||55) + (parseFloat(document.getElementById('bUtil')?.value)||100);
   const income = parseFloat(document.getElementById('bIncome')?.value) || 7400;
   const budgetedVariable = totalCap;
   const actualVariable = monthTotal;
@@ -797,6 +804,53 @@ function renderPayments() {
   }).join('');
 }
 
+// ═══════════════════════════════════════
+// RENT SCHEDULE (varies by month)
+// ═══════════════════════════════════════
+const RENT_SCHEDULE = [
+  // { year, month (0-indexed), rent }
+  { y:2026, m:1, rent:965, label:'Feb 2026' },
+  { y:2026, m:2, rent:851, label:'Mar 2026' },
+  { y:2026, m:3, rent:851, label:'Apr 2026' },
+  { y:2026, m:4, rent:1555, label:'May 2026' },
+  { y:2026, m:5, rent:1555, label:'Jun 2026' },
+  { y:2026, m:6, rent:1555, label:'Jul 2026' },
+  { y:2026, m:7, rent:1555, label:'Aug 2026' },
+  { y:2026, m:8, rent:1555, label:'Sep 2026' },
+  { y:2026, m:9, rent:1555, label:'Oct 2026' },
+  { y:2026, m:10, rent:1555, label:'Nov 2026' },
+  { y:2026, m:11, rent:1555, label:'Dec 2026' },
+  { y:2027, m:0, rent:1555, label:'Jan 2027' },
+  { y:2027, m:1, rent:1110.30, label:'Feb 2027' },
+];
+
+function getRent(year, month) {
+  const entry = RENT_SCHEDULE.find(r => r.y === year && r.m === month);
+  if (entry) return entry.rent;
+  // Default: use last known or $1555
+  if (year > 2027 || (year === 2027 && month > 1)) return 1110.30;
+  return 1555;
+}
+
+function getCurrentRent() {
+  const now = new Date();
+  return getRent(now.getFullYear(), now.getMonth());
+}
+
+function renderRentSchedule() {
+  const el = document.getElementById('rentScheduleDisplay');
+  if (!el) return;
+  const colors = { 851:'var(--green)', 965:'var(--gold)', 1555:'var(--red)', 1110.30:'var(--gold)' };
+  el.innerHTML = RENT_SCHEDULE.map(r => {
+    const c = colors[r.rent] || 'var(--sub)';
+    const now = new Date();
+    const isCurrent = r.y === now.getFullYear() && r.m === now.getMonth();
+    return `<span style="display:inline-block;padding:3px 8px;margin:2px;border-radius:4px;font-size:10px;
+      background:${isCurrent ? c : 'var(--input)'};color:${isCurrent ? '#000' : c};
+      border:1px solid ${isCurrent ? c : 'var(--border)'};">${r.label}: $${r.rent.toLocaleString()}</span>`;
+  }).join('');
+}
+
 function renderBudget() {
   const income = parseFloat(document.getElementById('bIncome')?.value) || 7400;
 
@@ -807,13 +861,15 @@ function renderBudget() {
   document.getElementById('bStartSavings').value = startAvail;
 
   const healthAmt = parseFloat(document.getElementById('bHealth')?.value) || 0;
+  const currentRent = getCurrentRent();
 
   const items = [
-    { name: 'Rent', amt: parseFloat(document.getElementById('bRent')?.value) || 1525, color: 'var(--red)' },
+    { name: `Rent (current)`, amt: currentRent, color: 'var(--red)' },
     { name: 'Car EMI', amt: parseFloat(document.getElementById('bCar')?.value) || 587, color: 'var(--purple)' },
+    { name: 'Wifi', amt: parseFloat(document.getElementById('bWifi')?.value) || 55, color: 'var(--cyan,var(--blue))' },
+    { name: 'Utilities/Water', amt: parseFloat(document.getElementById('bUtil')?.value) || 100, color: 'var(--blue)' },
     { name: 'Food/Groceries', amt: parseFloat(document.getElementById('bFood')?.value) || 225, color: 'var(--gold)' },
-    { name: 'Utilities', amt: parseFloat(document.getElementById('bUtil')?.value) || 100, color: 'var(--blue)' },
-    { name: 'Trips/Shopping', amt: Math.round((parseFloat(document.getElementById('bTrips')?.value) || 6000) / 12), color: 'var(--purple)' },
+    { name: 'Trips/Shopping', amt: Math.round((parseFloat(document.getElementById('bTrips')?.value) || 6000) / 12), color: '#f97316' },
     { name: 'Personal/Misc', amt: parseFloat(document.getElementById('bMisc')?.value) || 100, color: 'var(--muted)' },
   ];
   if (healthAmt > 0) items.push({ name: 'Health/Medical', amt: healthAmt, color: '#ef4444' });
@@ -837,14 +893,24 @@ function renderBudget() {
   document.getElementById('eighteenSav').textContent = '$' + (savings * 18).toLocaleString();
   document.getElementById('expTotal').textContent = '$' + totalExp.toLocaleString();
   document.getElementById('savTotal').textContent = '$' + savings.toLocaleString();
+
+  renderRentSchedule();
 }
 
 function updateBudget() { render(); }
 
 function renderTimeline() {
-  const savings = parseFloat(document.getElementById('savTotal')?.textContent?.replace(/[$,]/g, '')) || 4363;
+  const income = parseFloat(document.getElementById('bIncome')?.value) || 7400;
+  const car = parseFloat(document.getElementById('bCar')?.value) || 587;
+  const wifi = parseFloat(document.getElementById('bWifi')?.value) || 55;
+  const util = parseFloat(document.getElementById('bUtil')?.value) || 100;
+  const food = parseFloat(document.getElementById('bFood')?.value) || 225;
+  const trips = Math.round((parseFloat(document.getElementById('bTrips')?.value) || 6000) / 12);
+  const misc = parseFloat(document.getElementById('bMisc')?.value) || 100;
+  const variableExp = food + trips + misc;
+  const fixedNoRent = car + wifi + util;
+
   const rate = 85;
-  const monthlyInr = Math.round(savings * rate);
   const startSavings = parseFloat(document.getElementById('bStartSavings')?.value) || 1000;
   const startInr = Math.round(startSavings * rate);
   const robinhood = parseFloat(document.getElementById('bRobinhood')?.value) || 25000;
@@ -861,11 +927,17 @@ function renderTimeline() {
     d.setMonth(d.getMonth() + m);
     const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
 
+    // Get rent for this specific month
+    const rent = getRent(d.getFullYear(), d.getMonth());
+    const totalExp = rent + fixedNoRent + variableExp;
+    const monthlySavings = income - totalExp;
+    const monthlyInr = Math.round(monthlySavings * rate);
+
     let available = monthlyInr;
-    let note = '';
+    let note = `Rent: $${rent}`;
 
     // Month 1: add starting savings
-    if (m === 0) { available += startInr; note = 'Savings: ₹' + lf(startInr); }
+    if (m === 0) { available += startInr; note += ' + Savings: ₹' + lf(startInr); }
 
     // Robinhood cash out spread over 3 months
     let rhCashout = 0;
@@ -886,26 +958,28 @@ function renderTimeline() {
       gold += toGold;
     }
 
-    if (rhCashout > 0) note = (note ? note + ' + ' : '') + 'RH: ₹' + lf(rhCashout);
+    if (rhCashout > 0) note += ' + RH: ₹' + lf(rhCashout);
 
-    months.push({ month: m + 1, label, toDebt, toGold, debtLeft: debt, goldTotal: gold, rh: rhCashout, note });
+    months.push({ month: m + 1, label, toDebt, toGold, debtLeft: debt, goldTotal: gold, rh: rhCashout, note, rent, savings: monthlySavings });
   }
 
   const container = document.getElementById('timelineContent');
   container.innerHTML = `<div class="card" style="padding:0;max-height:500px;overflow-y:auto;">
     <table>
-      <thead><tr><th>#</th><th>Month</th><th>→ Debt</th><th>→ Gold</th><th>Debt Left</th><th>Gold Total</th><th>Note</th></tr></thead>
+      <thead><tr><th>#</th><th>Month</th><th>Rent</th><th>Saves</th><th>→ Debt</th><th>→ Gold</th><th>Debt Left</th><th>Gold</th><th>Note</th></tr></thead>
       <tbody>${months.map(m => {
         const debtDone = m.debtLeft === 0 && m.toDebt > 0;
         const goldDone = m.goldTotal >= GOLD_TARGET;
         return `<tr style="${debtDone ? 'background:var(--gd);' : goldDone ? 'background:var(--yd);' : ''}">
           <td>${m.month}</td>
           <td style="font-weight:600;">${m.label}</td>
+          <td style="color:${m.rent > 1000 ? 'var(--red)' : 'var(--green)'};">$${m.rent}</td>
+          <td style="color:var(--green);">$${m.savings.toLocaleString()}</td>
           <td class="pos">${m.toDebt > 0 ? '₹' + lf(m.toDebt) : '—'}</td>
           <td class="gld">${m.toGold > 0 ? '₹' + lf(m.toGold) : '—'}</td>
           <td>${m.debtLeft > 0 ? '₹' + lf(m.debtLeft) : '<span class="pos">CLEARED</span>'}</td>
           <td>₹${lf(m.goldTotal)}</td>
-          <td style="color:var(--muted);font-size:10px;">${m.note || ''}${debtDone ? ' <b style="color:var(--green);">DEBT FREE!</b>' : ''}${goldDone ? ' <b style="color:var(--gold);">GOLD DONE!</b>' : ''}</td>
+          <td style="color:var(--muted);font-size:9px;">${m.rh > 0 ? 'RH: ₹'+lf(m.rh) : ''}${debtDone ? ' <b style="color:var(--green);">DEBT FREE!</b>' : ''}${goldDone ? ' <b style="color:var(--gold);">GOLD DONE!</b>' : ''}</td>
         </tr>`;
       }).join('')}</tbody>
     </table>
