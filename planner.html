@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0e1a">
-<title>Money Planner</title>
+<title>Money Planner — 18 Month Goal</title>
 <style>
 :root{--bg:#0a0e1a;--card:#1a2235;--border:#2a3550;--input:#0f1629;--green:#00c805;--gd:rgba(0,200,5,0.1);--red:#ff5000;--rd:rgba(255,80,0,0.1);--gold:#fec925;--yd:rgba(254,201,37,0.12);--blue:#3b82f6;--bd:rgba(59,130,246,0.1);--purple:#a855f7;--pd:rgba(168,85,247,0.1);--cyan:#06b6d4;--text:#e2e8f0;--sub:#94a3b8;--muted:#64748b;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 .mx{max-width:960px;margin:0 auto;padding:10px;}
-h1{font-size:20px;font-weight:700;text-align:center;} h1 span{color:var(--gold);}
+h1{font-size:20px;font-weight:700;text-align:center;}h1 span{color:var(--gold);}
 .sh{text-align:center;font-size:10px;color:var(--muted);margin-bottom:12px;}
 .grid{display:grid;gap:8px;margin-bottom:10px;}
 .g2{grid-template-columns:1fr 1fr;}.g3{grid-template-columns:repeat(3,1fr);}.g4{grid-template-columns:repeat(4,1fr);}.g5{grid-template-columns:repeat(5,1fr);}
@@ -41,16 +41,14 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
 .row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(42,53,80,0.15);font-size:11px;}
 .row:last-child{border-bottom:none;}
 .row .n{color:var(--sub);flex:1;}.row .v{font-weight:600;text-align:right;}
-.ff{display:flex;flex-direction:column;gap:2px;}
-.ff label{font-size:8px;text-transform:uppercase;letter-spacing:0.4px;color:var(--muted);font-weight:600;}
-.ff input{background:var(--input);border:1px solid var(--border);border-radius:5px;padding:7px 8px;color:var(--text);font-size:13px;outline:none;-webkit-appearance:none;}
-.ff input:focus{border-color:var(--gold);}
-.fr{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;}
+.phase{border-left:3px solid var(--border);padding:8px 12px;margin:6px 0;border-radius:0 6px 6px 0;background:rgba(26,34,53,0.5);}
+.phase.p1{border-color:var(--green);}.phase.p2{border-color:var(--gold);}.phase.p3{border-color:var(--blue);}
 .warn{background:var(--yd);border-radius:6px;padding:8px;font-size:10px;color:var(--gold);margin-top:6px;line-height:1.5;}
 .tip{background:var(--gd);border-radius:6px;padding:8px;font-size:10px;color:var(--green);margin-top:6px;line-height:1.5;}
-.phase{border-left:3px solid var(--border);padding:8px 12px;margin:6px 0;border-radius:0 6px 6px 0;background:rgba(26,34,53,0.5);}
-.phase.p1{border-color:var(--green);} .phase.p2{border-color:var(--gold);} .phase.p3{border-color:var(--blue);}
-@media(max-width:768px){.g3,.g4,.g5{grid-template-columns:repeat(2,1fr);}.fr{flex-direction:column;}.ff{width:100%!important;flex:none!important;}}
+.countdown{text-align:center;padding:12px;background:linear-gradient(135deg,rgba(254,201,37,0.1),rgba(0,200,5,0.1));border-radius:10px;border:1px solid var(--gold);margin-bottom:12px;}
+.countdown .big{font-size:36px;font-weight:800;color:var(--gold);}
+.countdown .sub{font-size:10px;color:var(--sub);margin-top:2px;}
+@media(max-width:768px){.g3,.g4,.g5{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:400px){.g2{grid-template-columns:1fr;}}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
@@ -58,61 +56,89 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
 <body>
 <div class="mx">
 
-<h1>Money <span>Planner</span></h1>
-<p class="sh">$7,000/month | 3 Goals: Clear ₹50L Debt + Buy ₹50L Gold + Build Investments</p>
+<h1>18-Month <span>Freedom Plan</span></h1>
+<p class="sh">Clear ₹50L Debt + Buy ₹50L Gold + Start Investments = ₹1 Crore by Sep 2027</p>
 
-<!-- ══ NET WORTH ══ -->
-<div class="grid g5">
-  <div class="card c"><div class="lbl">Assets</div><div class="val" style="font-size:14px;">$34,800</div><div class="sm">Cash + Stocks</div></div>
-  <div class="card c"><div class="lbl">Debts</div><div class="val neg" style="font-size:14px;">-$58,800</div><div class="sm">₹50L family</div></div>
-  <div class="card c"><div class="lbl">Net Worth</div><div class="val neg" style="font-size:14px;">-$24,000</div></div>
-  <div class="card c"><div class="lbl">Monthly Free</div><div class="val gld" style="font-size:14px;">$3,302</div><div class="sm">For goals</div></div>
-  <div class="card c"><div class="lbl">Savings Rate</div><div class="val pos" style="font-size:14px;">47%</div></div>
+<!-- Countdown -->
+<div class="countdown">
+  <div class="big" id="countdown">18</div>
+  <div class="sub">months to financial freedom | <span id="targetDate">Sep 2027</span></div>
 </div>
 
-<!-- ══ SALARY FLOW ══ -->
+<!-- ══ TOP NUMBERS ══ -->
+<div class="grid g5">
+  <div class="card c"><div class="lbl">Assets</div><div class="val" style="font-size:14px;">$34,800</div></div>
+  <div class="card c"><div class="lbl">Family Debt</div><div class="val neg" style="font-size:14px;">₹50L</div></div>
+  <div class="card c"><div class="lbl">Monthly Free</div><div class="val gld" style="font-size:14px;">$3,302</div></div>
+  <div class="card c"><div class="lbl">+ Options Avg</div><div class="val" style="font-size:14px;color:var(--purple);">$750</div></div>
+  <div class="card c"><div class="lbl">Total/Month</div><div class="val pos" style="font-size:14px;">$4,052</div></div>
+</div>
+
+<!-- Salary flow -->
 <div class="sec">
-  <div class="sec-t">Monthly $7,000 — Where Every Dollar Goes</div>
-  <div class="alloc" id="allocBar"></div>
-  <div class="al" id="allocLegend"></div>
+  <div class="sec-t">$7,000 Salary Split</div>
+  <div class="alloc">
+    <div style="width:22.2%;background:#ef4444;">Rent</div>
+    <div style="width:8.6%;background:var(--purple);">Car</div>
+    <div style="width:2.2%;background:var(--blue);">U+W</div>
+    <div style="width:7.1%;background:var(--green);">Food</div>
+    <div style="width:0.8%;background:var(--muted);">G+P</div>
+    <div style="width:5.7%;background:#f97316;">Trip</div>
+    <div style="width:2.5%;background:var(--cyan);">Fam</div>
+    <div style="width:4.3%;background:var(--blue);">SIP</div>
+    <div style="width:42.9%;background:var(--gold);">Goals</div>
+  </div>
+  <div class="al">
+    <span><span class="dot" style="background:#ef4444"></span>Rent $1,555</span>
+    <span><span class="dot" style="background:var(--purple)"></span>Car $600</span>
+    <span><span class="dot" style="background:var(--blue)"></span>Util+Wifi $155</span>
+    <span><span class="dot" style="background:var(--green)"></span>Food $500</span>
+    <span><span class="dot" style="background:var(--muted)"></span>Gas+Personal $55</span>
+    <span><span class="dot" style="background:#f97316"></span>Trips $400</span>
+    <span><span class="dot" style="background:var(--cyan)"></span>Family $175</span>
+    <span><span class="dot" style="background:var(--blue)"></span>SIP $300</span>
+    <span><span class="dot" style="background:var(--gold)"></span>→ Debt/Gold $3,002</span>
+  </div>
 </div>
 
 <!-- ══ TABS ══ -->
 <div class="tabs">
   <button class="tab active" onclick="showTab('plan',this)">The Plan</button>
   <button class="tab" onclick="showTab('budget',this)">Budget</button>
+  <button class="tab" onclick="showTab('boosters',this)">Gap Closers</button>
+  <button class="tab" onclick="showTab('timeline',this)">Timeline</button>
   <button class="tab" onclick="showTab('invest',this)">Investments</button>
   <button class="tab" onclick="showTab('options',this)">Options</button>
-  <button class="tab" onclick="showTab('timeline',this)">Timeline</button>
-  <button class="tab" onclick="showTab('projections',this)">Growth</button>
   <button class="tab" onclick="showTab('rules',this)">Rules</button>
 </div>
 
 <!-- ══ THE PLAN ══ -->
 <div class="pane active" id="plan">
-
   <div class="card" style="border-color:var(--gold);">
-    <div class="lbl" style="color:var(--gold);">The Master Plan — 3 Phases</div>
+    <div class="lbl" style="color:var(--gold);">18-Month Parallel Plan</div>
     <div style="font-size:11px;color:var(--sub);margin-top:4px;line-height:1.6;">
-      You have <b style="color:var(--text);">$3,302/month</b> after living expenses + <b style="color:var(--purple);">~$500/month options income</b> = <b style="color:var(--gold);">$3,802/month</b> towards goals.
-      Plus <b style="color:var(--text);">$3,800 upfront</b> cash and <b style="color:var(--blue);">$25K Robinhood</b> cash-out in month 8-10.
+      <b style="color:var(--text);">Strategy: Debt first (month 1-10), then all-in gold (month 11-18).</b>
+      Gold buying starts small from month 1 (30%) to average out price.
+      Robinhood cash-out in month 8-10 accelerates debt payoff.
     </div>
   </div>
 
   <!-- Phase 1 -->
   <div class="phase p1">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div><span class="badge bg">Phase 1</span> <b style="margin-left:4px;">Clear ₹50L Debt</b></div>
-      <span style="font-size:10px;color:var(--muted);">Month 1–10 (Apr '26 – Jan '27)</span>
+      <div><span class="badge bg">Phase 1</span> <b style="margin-left:4px;">Debt 70% + Gold 30%</b></div>
+      <span style="font-size:10px;color:var(--muted);">Month 1–10</span>
     </div>
     <div style="font-size:10px;color:var(--sub);margin-top:6px;line-height:1.7;">
-      <div class="row"><span class="n">Month 1: Upfront savings</span><span class="v pos">$3,800 (₹3.2L)</span></div>
-      <div class="row"><span class="n">Month 1-7: $3,502/mo to debt</span><span class="v pos">$24,514 (₹20.8L)</span></div>
-      <div class="row"><span class="n">Month 8-10: + Robinhood cash-out</span><span class="v pos">$35,505 (₹30.2L)</span></div>
-      <div class="row"><span class="n">SIP running alongside</span><span class="v" style="color:var(--blue);">$300/mo (VOO)</span></div>
+      <div class="row"><span class="n">Monthly to debt (70%)</span><span class="v pos">$2,451 (₹2.1L)</span></div>
+      <div class="row"><span class="n">Monthly to gold (30%)</span><span class="v gld">$1,051 (₹0.9L)</span></div>
+      <div class="row"><span class="n">Options income → debt</span><span class="v" style="color:var(--purple);">$750/mo</span></div>
+      <div class="row"><span class="n">Upfront savings → debt</span><span class="v pos">$3,800</span></div>
+      <div class="row"><span class="n">Robinhood cash-out (month 8-10)</span><span class="v pos">$30,000</span></div>
+      <div class="row"><span class="n">SIP running</span><span class="v" style="color:var(--blue);">$300/mo VOO</span></div>
       <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
-        <b class="pos">Total to debt: $63,819 (₹54.2L) → DEBT CLEARED month 10</b><br>
-        <span style="color:var(--muted);">Surplus: ~$5,019 (₹4.3L) → starts gold</span>
+        <div class="row"><span class="n"><b>Debt paid (10 months)</b></span><span class="v pos">$3,800 + $32,010 + $30,000 = $65,810 (₹55.9L) ✓</span></div>
+        <div class="row"><span class="n"><b>Gold bought (10 months)</b></span><span class="v gld">$10,510 (₹8.9L)</span></div>
       </div>
     </div>
   </div>
@@ -120,17 +146,30 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
   <!-- Phase 2 -->
   <div class="phase p2">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div><span class="badge by">Phase 2</span> <b style="margin-left:4px;">Buy ₹50L Gold</b></div>
-      <span style="font-size:10px;color:var(--muted);">Month 11–24 (Feb '27 – Mar '28)</span>
+      <div><span class="badge by">Phase 2</span> <b style="margin-left:4px;">100% Gold</b></div>
+      <span style="font-size:10px;color:var(--muted);">Month 11–18</span>
     </div>
     <div style="font-size:10px;color:var(--sub);margin-top:6px;line-height:1.7;">
-      <div class="row"><span class="n">Surplus from Phase 1</span><span class="v gld">$5,019 (₹4.3L)</span></div>
-      <div class="row"><span class="n">Month 11-24: $3,202/mo to gold</span><span class="v gld">$44,828 (₹38.1L)</span></div>
-      <div class="row"><span class="n">Options income → gold</span><span class="v gld">$7,000 (₹6.0L)</span></div>
-      <div class="row"><span class="n">SIP continues</span><span class="v" style="color:var(--blue);">$300/mo (VOO)</span></div>
+      <div class="row"><span class="n">Monthly to gold (100%)</span><span class="v gld">$3,502 (₹3.0L)</span></div>
+      <div class="row"><span class="n">Options income → gold</span><span class="v" style="color:var(--purple);">$750/mo</span></div>
+      <div class="row"><span class="n">Debt surplus → gold</span><span class="v gld">$7,010 (₹6.0L)</span></div>
       <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
-        <b class="gld">Total gold: $56,847 (₹48.3L) by month 24</b><br>
-        <span style="color:var(--muted);">Short ₹1.7L → covered month 25 or from one good options month</span>
+        <div class="row"><span class="n"><b>Gold (8 months)</b></span><span class="v gld">$7,010 + $28,016 + $6,000 = $41,026 (₹34.9L)</span></div>
+        <div class="row"><span class="n"><b>Total gold (18 months)</b></span><span class="v gld">$10,510 + $41,026 = $51,536 (₹43.8L)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gap -->
+  <div class="card" style="border-color:rgba(255,80,0,0.3);">
+    <div class="lbl" style="color:var(--red);">Gold Gap: ₹6.2L ($7,294) — How to Close</div>
+    <div style="font-size:10px;color:var(--sub);line-height:1.7;margin-top:4px;">
+      <div class="row"><span class="n">Robinhood extra recovery ($30K→$35K)</span><span class="v pos">+$5,000</span></div>
+      <div class="row"><span class="n">Gold making charges 12%→8% (negotiate)</span><span class="v pos">+$2,940</span></div>
+      <div class="row"><span class="n">Options avg $750 → $1,000 (2 good months)</span><span class="v pos">+$4,500</span></div>
+      <div class="row"><span class="n">Sell unused items / signup bonuses</span><span class="v pos">+$1,500</span></div>
+      <div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border);font-weight:700;">
+        You only need 2-3 of these to close the gap. Total available: +$13,940
       </div>
     </div>
   </div>
@@ -139,89 +178,120 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
   <div class="phase p3">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div><span class="badge bb">Phase 3</span> <b style="margin-left:4px;">Wealth Building</b></div>
-      <span style="font-size:10px;color:var(--muted);">Month 25+ (Apr '28 onward)</span>
+      <span style="font-size:10px;color:var(--muted);">Month 19+ (Oct 2027)</span>
     </div>
     <div style="font-size:10px;color:var(--sub);margin-top:6px;line-height:1.7;">
-      Debt: CLEARED. Gold: DONE. All $3,802/month now goes to investments.<br>
-      <div class="row"><span class="n">VOO (S&P 500)</span><span class="v" style="color:var(--blue);">$1,500/mo (40%)</span></div>
-      <div class="row"><span class="n">Growth stocks (NVDA, AMZN, GOOGL)</span><span class="v pos">$800/mo (21%)</span></div>
-      <div class="row"><span class="n">India ETF (INDA/FLIN)</span><span class="v" style="color:var(--purple);">$750/mo (20%)</span></div>
-      <div class="row"><span class="n">Gold ETF (GLD)</span><span class="v gld">$450/mo (12%)</span></div>
-      <div class="row"><span class="n">Options capital stays</span><span class="v" style="color:var(--muted);">$1,500 (fixed)</span></div>
-      <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
-        <b style="color:var(--blue);">$3,500/month SIP = $42,000/year → $250K+ in 5 years at 12%</b>
+      Debt: DONE. Gold: DONE. Full $4,052/month to investments.<br>
+      <div class="row"><span class="n">VOO (S&P 500)</span><span class="v" style="color:var(--blue);">$1,600 (40%)</span></div>
+      <div class="row"><span class="n">Growth (NVDA, AMZN, GOOGL)</span><span class="v pos">$900 (22%)</span></div>
+      <div class="row"><span class="n">India ETF (INDA)</span><span class="v" style="color:var(--purple);">$800 (20%)</span></div>
+      <div class="row"><span class="n">Gold ETF (GLD)</span><span class="v gld">$500 (12%)</span></div>
+      <div class="row"><span class="n">Options profits</span><span class="v" style="color:var(--purple);">→ 50% VOO / 30% Growth / 20% Gold</span></div>
+      <div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border);">
+        <b style="color:var(--blue);">$3,800/month SIP → $280K+ in 5 years at 12%</b>
       </div>
     </div>
   </div>
 
-  <!-- During ALL phases -->
-  <div class="card" style="margin-top:8px;">
-    <div class="lbl">Running Throughout All Phases</div>
-    <div style="font-size:10px;color:var(--sub);line-height:1.7;margin-top:4px;">
-      <div class="row"><span class="n">VOO SIP (from month 1)</span><span class="v" style="color:var(--blue);">$300/month</span></div>
-      <div class="row"><span class="n">Options trading</span><span class="v" style="color:var(--purple);">$1,500 capital (fixed)</span></div>
-      <div class="row"><span class="n">Emergency fund</span><span class="v neg">$9,000 (untouchable)</span></div>
-      <div class="row"><span class="n">Trips fund</span><span class="v">$583/month ($7K/year)</span></div>
-      <div class="row"><span class="n">Family shopping</span><span class="v">$250/month ($3K/year)</span></div>
-    </div>
-  </div>
-
-  <div class="warn">
-    <b>Honest note:</b> 18 months is too tight for ₹1 Crore. The math says <b>24-25 months</b> with discipline.
-    To hit 18 months you'd need: trips cut to $3K/year + options avg $1,000/month + Robinhood at $30K+. Possible but aggressive.
-  </div>
+  <div class="tip"><b>Bottom line:</b> Debt cleared month 10. Gold ₹44-50L by month 18. $7,200+ in VOO from SIP. Gap closers give you $14K buffer. This works.</div>
 </div>
 
 <!-- ══ BUDGET ══ -->
 <div class="pane" id="budget">
   <div class="sec-t">Monthly Budget — $7,000</div>
+
   <div class="card">
-    <div class="lbl">Fixed Expenses (Non-Negotiable)</div>
+    <div class="lbl">Fixed (Can't Change)</div>
     <div class="row"><span class="n">Rent</span><span class="v neg">$1,555</span></div>
     <div class="row"><span class="n">Car EMI</span><span class="v neg">$600</span></div>
     <div class="row"><span class="n">Utilities/Water</span><span class="v neg">$100</span></div>
     <div class="row"><span class="n">Wifi</span><span class="v neg">$55</span></div>
     <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;font-weight:700;border-top:1px solid var(--border);margin-top:4px;">
-      <span>Fixed Total</span><span class="neg">$2,310</span>
+      <span>Fixed</span><span class="neg">$2,310</span>
     </div>
   </div>
 
   <div class="card" style="margin-top:8px;">
-    <div class="lbl">Variable Expenses (Controllable)</div>
+    <div class="lbl">Variable (Optimized for 18 months)</div>
     <div class="row"><span class="n">Food/Grocery</span><span class="v">$400</span></div>
     <div class="row"><span class="n">Outside Food</span><span class="v">$100</span></div>
     <div class="row"><span class="n">Gas</span><span class="v">$40</span></div>
     <div class="row"><span class="n">Personal</span><span class="v">$15</span></div>
-    <div class="row"><span class="n">Trips ($7K/year)</span><span class="v">$583</span></div>
-    <div class="row"><span class="n">Family Shopping ($3K/year)</span><span class="v">$250</span></div>
+    <div class="row"><span class="n">Trips ($4,800/year — optimized)</span><span class="v">$400</span></div>
+    <div class="row"><span class="n">Family Shopping ($2,100/year — optimized)</span><span class="v">$175</span></div>
     <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;font-weight:700;border-top:1px solid var(--border);margin-top:4px;">
-      <span>Variable Total</span><span>$1,388</span>
+      <span>Variable</span><span>$1,130</span>
     </div>
+    <div class="sm" style="color:var(--gold);">Saved $258/month vs original ($583 trips + $250 family)</div>
   </div>
 
   <div class="card" style="margin-top:8px;">
-    <div class="lbl">What's Left for Goals</div>
-    <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;font-weight:700;">
-      <span>$7,000 - $2,310 - $1,388</span><span class="gld">= $3,302/month</span>
-    </div>
-    <div class="row"><span class="n">+ Options income (avg)</span><span class="v" style="color:var(--purple);">+$500</span></div>
+    <div class="lbl">Goal Allocation</div>
+    <div class="row"><span class="n">SIP (VOO — from day 1)</span><span class="v" style="color:var(--blue);">$300</span></div>
+    <div class="row"><span class="n">→ Debt/Gold</span><span class="v gld">$3,002</span></div>
+    <div class="row"><span class="n">+ Options income (avg)</span><span class="v" style="color:var(--purple);">+$750</span></div>
     <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:800;border-top:1px solid var(--gold);margin-top:4px;">
-      <span>Total for Goals</span><span class="gld">$3,802/month</span>
+      <span>Total to Goals</span><span class="gld">$4,052/month</span>
     </div>
   </div>
 
-  <!-- Savings accelerators -->
-  <div class="card" style="margin-top:8px;border-color:rgba(0,200,5,0.3);">
-    <div class="lbl" style="color:var(--green);">Want to Hit 18 Months? Cut Here:</div>
-    <div style="font-size:10px;color:var(--sub);line-height:1.7;margin-top:4px;">
-      <div class="row"><span class="n">Trips $7K → $4K/year</span><span class="v pos">+$250/mo</span></div>
-      <div class="row"><span class="n">Food $400 → $300</span><span class="v pos">+$100/mo</span></div>
-      <div class="row"><span class="n">Outside food $100 → $50</span><span class="v pos">+$50/mo</span></div>
-      <div class="row"><span class="n">Family shopping $3K → $2K</span><span class="v pos">+$83/mo</span></div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;font-weight:700;border-top:1px solid var(--border);margin-top:4px;">
-        <span>Extra savings</span><span class="pos">+$483/month → $3,785 + $500 options = $4,285</span>
-      </div>
+  <div style="margin-top:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:10px;">
+    <div style="display:flex;justify-content:space-between;padding:2px 0;color:var(--muted);">
+      <span>Income</span><span>$7,000</span>
     </div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0;color:var(--red);">
+      <span>Fixed</span><span>-$2,310</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0;">
+      <span>Variable</span><span>-$1,130</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0;color:var(--blue);">
+      <span>SIP</span><span>-$300</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0;font-weight:700;border-top:1px solid var(--border);margin-top:2px;font-size:12px;">
+      <span>= To Debt/Gold</span><span class="gld">$3,260 + $750 options = $4,010</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GAP CLOSERS ══ -->
+<div class="pane" id="boosters">
+  <div class="sec-t">Gap Closers — Extra $7,294 Needed</div>
+
+  <div class="card">
+    <div class="lbl">Your Arsenal</div>
+    <table style="margin-top:4px;">
+      <thead><tr><th>Source</th><th>Amount</th><th>Effort</th><th>Likely?</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600;">Robinhood recovers $30K→$35K</td><td class="pos">+$5,000</td><td>Hold & wait</td><td><span class="badge bg">High</span></td></tr>
+        <tr><td style="font-weight:600;">Gold: negotiate 8% making (not 12%)</td><td class="pos">+$2,940</td><td>Bargain at GRT/Kalyan</td><td><span class="badge bg">High</span></td></tr>
+        <tr><td style="font-weight:600;">Options avg $1K (2 good months)</td><td class="pos">+$4,500</td><td>Trade well</td><td><span class="badge by">Medium</span></td></tr>
+        <tr><td style="font-weight:600;">Sell unused items (clothes, electronics)</td><td class="pos">+$500</td><td>List on FB/OfferUp</td><td><span class="badge bg">High</span></td></tr>
+        <tr><td style="font-weight:600;">Credit card signup bonuses</td><td class="pos">+$500</td><td>Apply for Chase/Amex</td><td><span class="badge bg">High</span></td></tr>
+        <tr><td style="font-weight:600;">Tax refund</td><td class="pos">+$2,000</td><td>File early</td><td><span class="badge by">Medium</span></td></tr>
+        <tr><td style="font-weight:600;">Freelance (1-2 AI/data gigs)</td><td class="pos">+$2,000</td><td>Upwork/referral</td><td><span class="badge by">Medium</span></td></tr>
+        <tr><td style="font-weight:600;">Buy gold on Akshaya Tritiya/festivals</td><td class="pos">+$1,500</td><td>Time purchases</td><td><span class="badge bg">High</span></td></tr>
+        <tr><td style="font-weight:600;">Negotiate debt (₹50L→₹47L early pay)</td><td class="pos">+$3,529</td><td>Ask friend</td><td><span class="badge by">Medium</span></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border);font-size:11px;">
+      <span style="color:var(--muted);">Total available:</span>
+      <span class="pos" style="font-weight:700;">+$22,469</span>
+      <span style="color:var(--muted);"> — You only need $7,294. Pick any 2-3.</span>
+    </div>
+  </div>
+
+  <div class="tip"><b>Easiest combo:</b> Robinhood $30K (+$5K) + negotiate 8% making charges (+$2.9K) = $7,940. Gap closed with $646 to spare. Zero extra effort.</div>
+</div>
+
+<!-- ══ TIMELINE ══ -->
+<div class="pane" id="timeline">
+  <div class="sec-t">Month-by-Month Plan</div>
+  <div class="card" style="padding:0;max-height:500px;overflow-y:auto;">
+    <table>
+      <thead><tr><th>#</th><th>Month</th><th>→Debt</th><th>→Gold</th><th>Debt Left</th><th>Gold</th><th>Note</th></tr></thead>
+      <tbody id="tlBody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -229,65 +299,47 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
 <div class="pane" id="invest">
   <div class="sec-t">Investment Strategy</div>
 
-  <!-- Phase 1-2: Small SIP -->
   <div class="card">
-    <div class="lbl">During Debt + Gold Phase (Month 1-24): $300/month SIP</div>
-    <div style="margin-top:6px;">
-      <div class="row"><span class="n">100% into VOO (S&P 500)</span><span class="v" style="color:var(--blue);">$300/mo</span></div>
-    </div>
-    <div class="sm">Keep it simple. One fund. Build the habit. Don't complicate until debt and gold are done.</div>
-    <div style="margin-top:6px;">
-      <div class="row"><span class="n">24 months invested</span><span class="v">$7,200</span></div>
-      <div class="row"><span class="n">At 10% return</span><span class="v pos">$7,970</span></div>
-      <div class="row"><span class="n">At 12% return</span><span class="v pos">$8,135</span></div>
-    </div>
+    <div class="lbl">Phase 1-2: $300/month SIP (Month 1-18)</div>
+    <div class="row"><span class="n">100% VOO (S&P 500)</span><span class="v" style="color:var(--blue);">$300/mo</span></div>
+    <div class="sm">Keep it simple. One fund. Build the habit. 18 months = $5,400 invested → ~$5,800 at 10%</div>
   </div>
 
-  <!-- Phase 3: Full SIP -->
   <div class="card" style="margin-top:8px;">
-    <div class="lbl">After Debt + Gold Done (Month 25+): $3,500/month SIP</div>
-    <div class="grid g4" style="margin-top:8px;">
+    <div class="lbl">Phase 3: $3,800/month SIP (Month 19+)</div>
+    <div class="grid g4" style="margin-top:6px;">
       <div class="card c" style="border-color:rgba(59,130,246,0.3);padding:8px;">
-        <div style="font-size:8px;color:var(--muted);">VOO (S&P 500)</div>
-        <div style="font-size:16px;font-weight:700;color:var(--blue);">$1,500</div>
-        <div style="font-size:8px;color:var(--muted);">43%</div>
+        <div style="font-size:16px;font-weight:700;color:var(--blue);">$1,600</div>
+        <div style="font-size:8px;color:var(--muted);">VOO (42%)</div>
       </div>
       <div class="card c" style="border-color:rgba(0,200,5,0.3);padding:8px;">
-        <div style="font-size:8px;color:var(--muted);">Growth Stocks</div>
-        <div style="font-size:16px;font-weight:700;color:var(--green);">$800</div>
-        <div style="font-size:8px;color:var(--muted);">23%</div>
+        <div style="font-size:16px;font-weight:700;color:var(--green);">$900</div>
+        <div style="font-size:8px;color:var(--muted);">Growth (24%)</div>
       </div>
       <div class="card c" style="border-color:rgba(168,85,247,0.3);padding:8px;">
-        <div style="font-size:8px;color:var(--muted);">India (INDA)</div>
-        <div style="font-size:16px;font-weight:700;color:var(--purple);">$750</div>
-        <div style="font-size:8px;color:var(--muted);">21%</div>
+        <div style="font-size:16px;font-weight:700;color:var(--purple);">$800</div>
+        <div style="font-size:8px;color:var(--muted);">India INDA (21%)</div>
       </div>
       <div class="card c" style="border-color:rgba(254,201,37,0.3);padding:8px;">
-        <div style="font-size:8px;color:var(--muted);">Gold (GLD)</div>
-        <div style="font-size:16px;font-weight:700;color:var(--gold);">$450</div>
-        <div style="font-size:8px;color:var(--muted);">13%</div>
+        <div style="font-size:16px;font-weight:700;color:var(--gold);">$500</div>
+        <div style="font-size:8px;color:var(--muted);">Gold GLD (13%)</div>
       </div>
     </div>
-    <div class="tip">Auto-invest on the 1st of every month. Money moves before you spend it.</div>
   </div>
 
-  <!-- Growth table -->
   <div class="card" style="margin-top:8px;">
-    <div class="lbl">SIP Growth: $300/mo (now) → $3,500/mo (after month 24)</div>
+    <div class="lbl">SIP Growth Projection</div>
     <table style="margin-top:4px;">
       <thead><tr><th>Year</th><th>Phase</th><th>Invested</th><th>At 10%</th><th>At 12%</th></tr></thead>
-      <tbody id="sipGrowth"></tbody>
+      <tbody>
+        <tr><td>Year 1</td><td style="color:var(--muted);">$300/mo</td><td>$3,600</td><td class="pos">$3,770</td><td class="pos">$3,810</td></tr>
+        <tr><td>Year 2</td><td style="color:var(--muted);">$300→$3,800</td><td>$26,400</td><td class="pos">$28,250</td><td class="pos">$28,900</td></tr>
+        <tr><td>Year 3</td><td style="color:var(--muted);">$3,800/mo</td><td>$72,000</td><td class="pos">$80,100</td><td class="pos">$83,200</td></tr>
+        <tr><td style="font-weight:700;">Year 5</td><td style="color:var(--muted);">$3,800/mo</td><td style="font-weight:700;">$163,200</td><td class="pos" style="font-weight:700;">$198,000</td><td class="pos" style="font-weight:700;">$212,000</td></tr>
+        <tr><td style="font-weight:700;">Year 10</td><td style="color:var(--muted);">$3,800/mo</td><td style="font-weight:700;">$390,000</td><td class="pos" style="font-weight:700;">$580,000</td><td class="gld" style="font-weight:700;">$680,000</td></tr>
+      </tbody>
     </table>
-  </div>
-
-  <!-- Current stocks -->
-  <div class="card" style="margin-top:8px;">
-    <div class="lbl">Current $22K Stocks — Rebalance Plan</div>
-    <div style="font-size:10px;color:var(--sub);line-height:1.7;margin-top:4px;">
-      <b>Now:</b> Hold SMCI, RIVN, SOFI, SOUN, URNJ, BBAI. Wait for recovery.<br>
-      <b>Month 8-10:</b> Cash out $25K for debt payoff.<br>
-      <b>After cash-out:</b> Any remaining stocks → gradually move to VOO on green days.
-    </div>
+    <div class="tip">Start $300/mo now. Scale to $3,800/mo after month 18. <b>$680K in 10 years.</b></div>
   </div>
 </div>
 
@@ -298,33 +350,32 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
   <div class="card">
     <div class="lbl">Your Strategy: 5 Lots × $0.25 = $125/day</div>
     <div class="row"><span class="n">Capital</span><span class="v">$1,000 + $500 backup</span></div>
-    <div class="row"><span class="n">Daily target</span><span class="v pos">$125 (5 lots × $0.25)</span></div>
+    <div class="row"><span class="n">Daily target</span><span class="v pos">$125</span></div>
     <div class="row"><span class="n">Weekly (4 days)</span><span class="v pos">$500</span></div>
-    <div class="row"><span class="n">Monthly ideal</span><span class="v pos">$2,000</span></div>
-    <div class="row"><span class="n">Monthly realistic</span><span class="v gld">$500-$800</span></div>
+    <div class="row"><span class="n">Budgeted avg</span><span class="v gld">$750/month</span></div>
   </div>
 
   <div class="card" style="margin-top:8px;">
-    <div class="lbl">Monthly Scenarios (Honest)</div>
+    <div class="lbl">Realistic Monthly Outcomes</div>
     <table style="margin-top:4px;">
       <thead><tr><th>Type</th><th>Win%</th><th>P&L</th><th>Odds</th></tr></thead>
       <tbody>
-        <tr><td class="pos" style="font-weight:600;">Great</td><td>70%</td><td class="pos" style="font-weight:700;">+$1,375</td><td>20%</td></tr>
-        <tr><td class="gld" style="font-weight:600;">Good</td><td>60%</td><td class="pos" style="font-weight:700;">+$800</td><td>30%</td></tr>
-        <tr><td style="font-weight:600;">Average</td><td>55%</td><td class="pos">+$550</td><td>25%</td></tr>
-        <tr><td class="neg" style="font-weight:600;">Bad</td><td>40%</td><td class="neg">-$275</td><td>15%</td></tr>
-        <tr><td class="neg" style="font-weight:600;">Terrible</td><td>25%</td><td class="neg">-$800</td><td>10%</td></tr>
+        <tr><td class="pos">Great</td><td>70%</td><td class="pos" style="font-weight:700;">+$1,375</td><td>20%</td></tr>
+        <tr><td class="gld">Good</td><td>60%</td><td class="pos" style="font-weight:700;">+$800</td><td>30%</td></tr>
+        <tr><td>Average</td><td>55%</td><td class="pos">+$550</td><td>25%</td></tr>
+        <tr><td class="neg">Bad</td><td>40%</td><td class="neg">-$275</td><td>15%</td></tr>
+        <tr><td class="neg">Terrible</td><td>25%</td><td class="neg">-$800</td><td>10%</td></tr>
       </tbody>
     </table>
-    <div style="margin-top:4px;font-size:10px;"><span style="color:var(--muted);">Weighted avg:</span> <span class="pos" style="font-weight:700;">+$528/month</span></div>
+    <div style="font-size:10px;margin-top:4px;"><span style="color:var(--muted);">Weighted avg:</span> <span class="pos" style="font-weight:700;">+$528/mo</span> <span style="color:var(--muted);">| Budgeted: $750 (you'll have good months)</span></div>
   </div>
 
   <div class="card" style="margin-top:8px;">
-    <div class="lbl">Where Options Profits Go</div>
-    <div class="row"><span class="n">Until $8,310 recovered</span><span class="v neg">→ Recovery</span></div>
-    <div class="row"><span class="n">Month 1-10 (after recovery)</span><span class="v pos">→ Debt payoff</span></div>
-    <div class="row"><span class="n">Month 11-24</span><span class="v gld">→ Gold fund</span></div>
-    <div class="row"><span class="n">Month 25+</span><span class="v" style="color:var(--blue);">→ 50% VOO / 30% Growth / 20% Gold</span></div>
+    <div class="lbl">Where Profits Go</div>
+    <div class="row"><span class="n">First $8,310</span><span class="v neg">→ Loss recovery</span></div>
+    <div class="row"><span class="n">Month 1-10 (after recovery)</span><span class="v pos">→ Debt</span></div>
+    <div class="row"><span class="n">Month 11-18</span><span class="v gld">→ Gold</span></div>
+    <div class="row"><span class="n">Month 19+</span><span class="v" style="color:var(--blue);">→ SIP (50% VOO / 30% Growth / 20% Gold)</span></div>
   </div>
 
   <div class="card" style="margin-top:8px;border-color:rgba(255,80,0,0.3);">
@@ -332,72 +383,42 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
     <div style="font-size:10px;line-height:1.8;color:var(--sub);margin-top:4px;">
       1. <b style="color:var(--red);">Daily stop: -$150.</b> Walk away.<br>
       2. <b style="color:var(--red);">Weekly cap: -$400.</b> Stop for the week.<br>
-      3. <b style="color:var(--red);">Never add to $1,500.</b> If at $500, reassess.<br>
-      4. <b style="color:var(--gold);">3 green months → increase to 7 lots.</b><br>
-      5. <b style="color:var(--gold);">2 red months → drop to 3 lots.</b><br>
-      6. <b style="color:var(--green);">Profits → goals. Never back to trading capital.</b>
+      3. <b style="color:var(--red);">Never add to $1,500.</b><br>
+      4. <b style="color:var(--gold);">3 green months → 7-8 lots.</b> 2 red months → 3 lots.<br>
+      5. <b style="color:var(--green);">Profits → goals. Never back to trading capital.</b>
     </div>
-  </div>
-</div>
-
-<!-- ══ TIMELINE ══ -->
-<div class="pane" id="timeline">
-  <div class="sec-t">Month-by-Month Plan</div>
-  <div class="card" style="padding:0;max-height:500px;overflow-y:auto;">
-    <table>
-      <thead><tr><th>#</th><th>Month</th><th>Rent</th><th>Free</th><th>→Goal</th><th>Debt</th><th>Gold</th><th>Note</th></tr></thead>
-      <tbody id="tlBody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ══ GROWTH PROJECTIONS ══ -->
-<div class="pane" id="projections">
-  <div class="sec-t">Net Worth Growth</div>
-  <div class="card">
-    <div class="lbl">Combined: Existing Assets + SIP + Options Income</div>
-    <table style="margin-top:4px;">
-      <thead><tr><th>Year</th><th>Portfolio</th><th>Options</th><th>Debt Status</th><th>Net Worth</th></tr></thead>
-      <tbody id="nwTable"></tbody>
-    </table>
-  </div>
-
-  <div class="card" style="margin-top:8px;">
-    <div class="lbl">After Phase 3: Full $3,500/month SIP Projection</div>
-    <table style="margin-top:4px;">
-      <thead><tr><th>Years Investing</th><th>Put In</th><th>At 10%</th><th>At 12%</th><th>At 15%</th></tr></thead>
-      <tbody id="fullSipTable"></tbody>
-    </table>
-    <div class="tip" style="margin-top:6px;">Starting $3,500/mo SIP after month 24 → <b>$250K+ portfolio in 5 years</b>. The key: start now with $300, scale up later.</div>
   </div>
 </div>
 
 <!-- ══ RULES ══ -->
 <div class="pane" id="rules">
-  <div class="sec-t">Financial Commandments</div>
+  <div class="sec-t">18-Month Commandments</div>
   <div class="card">
     <div style="font-size:11px;line-height:2;color:var(--sub);">
-      <div>1. <b style="color:var(--gold);">SIP on the 1st. Non-negotiable.</b> Even $300 during debt phase.</div>
-      <div>2. <b style="color:var(--green);">Debt before gold.</b> Every dollar to debt until ₹50L is cleared.</div>
-      <div>3. <b style="color:var(--red);">Emergency $9K = untouchable.</b> Not for debt, gold, or trades.</div>
-      <div>4. <b style="color:var(--purple);">Options capital = $1,500 max.</b> Profits go to goals, not back to trading.</div>
-      <div>5. <b style="color:var(--blue);">VOO is the backbone.</b> 40%+ of all investments, always.</div>
-      <div>6. <b style="color:var(--text);">No impulse shopping.</b> $250/month family shopping, $0 personal luxury until debt is cleared.</div>
-      <div>7. <b style="color:var(--text);">Trips: budget $7K/year.</b> Book early, no spontaneous expensive trips during Phase 1.</div>
-      <div>8. <b style="color:var(--text);">Review monthly.</b> Check this app on the 1st. Adjust only if income changes.</div>
-      <div>9. <b style="color:var(--text);">Current stocks: hold for recovery, cash out month 8-10.</b> Don't add.</div>
-      <div>10. <b style="color:var(--gold);">After month 25: you're free.</b> $3,500/month full SIP. Wealth compounds.</div>
+      <div>1. <b style="color:var(--gold);">SIP $300 on the 1st. Non-negotiable.</b> Even during debt phase.</div>
+      <div>2. <b style="color:var(--green);">Debt gets 70% until cleared.</b> Gold gets 30% from day 1.</div>
+      <div>3. <b style="color:var(--red);">Emergency $9K = untouchable.</b></div>
+      <div>4. <b style="color:var(--purple);">Options capital = $1,500 max.</b> Profits → goals.</div>
+      <div>5. <b style="color:var(--blue);">VOO is the backbone.</b> 100% of SIP during Phase 1-2.</div>
+      <div>6. <b style="color:var(--text);">Trips: $400/month max for 18 months.</b> Back to $583 after goals done.</div>
+      <div>7. <b style="color:var(--text);">Family shopping: $175/month for 18 months.</b></div>
+      <div>8. <b style="color:var(--text);">No impulse shopping. No luxury until debt cleared.</b></div>
+      <div>9. <b style="color:var(--text);">Robinhood: hold for recovery, cash out month 8-10.</b></div>
+      <div>10. <b style="color:var(--text);">Buy gold bars, not jewellery. Convert later. Save ₹2-3L.</b></div>
+      <div>11. <b style="color:var(--text);">Negotiate making charges to 8%.</b> Walk out if they say 12%.</div>
+      <div>12. <b style="color:var(--gold);">Review this plan on the 1st of every month.</b></div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:8px;border-color:rgba(254,201,37,0.3);">
+  <div class="card" style="margin-top:8px;border-color:var(--gold);">
     <div class="lbl" style="color:var(--gold);">The Big Picture</div>
     <div style="font-size:11px;color:var(--sub);line-height:1.7;margin-top:4px;">
-      <b>Month 10 (Jan '27):</b> Debt FREE. Net worth jumps +$58,800.<br>
-      <b>Month 24 (Mar '28):</b> Gold DONE. ₹50L in physical gold secured.<br>
-      <b>Month 25+:</b> $3,500/month full SIP begins. No debt. Gold secured.<br>
-      <b>Year 5 (2031):</b> Portfolio $250K+. Net worth $300K+.<br>
-      <b>Year 10 (2036):</b> Portfolio $700K+. Millionaire trajectory.
+      <b>Month 10 (Jan '27):</b> DEBT FREE. ₹50L cleared.<br>
+      <b>Month 18 (Sep '27):</b> GOLD DONE. ₹50L secured.<br>
+      <b>Month 19+ (Oct '27):</b> $3,800/month full SIP. Zero debt.<br>
+      <b>Year 3 (2029):</b> Portfolio $80K+<br>
+      <b>Year 5 (2031):</b> Portfolio $200K+<br>
+      <b>Year 10 (2036):</b> Portfolio $680K+. Near-millionaire.
     </div>
   </div>
 </div>
@@ -405,179 +426,86 @@ td{padding:4px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
 </div>
 
 <script>
-// ═══ CONSTANTS ═══
-const INCOME = 7000;
-const FIXED = { rent:1555, car:600, util:100, wifi:55 };
-const VARIABLE = { food:400, outside:100, gas:40, personal:15, trips:583, familyShop:250 };
-const FIXED_TOTAL = Object.values(FIXED).reduce((s,v)=>s+v,0); // 2310
-const VAR_TOTAL = Object.values(VARIABLE).reduce((s,v)=>s+v,0); // 1388
-const MONTHLY_FREE = INCOME - FIXED_TOTAL - VAR_TOTAL; // 3302
-const SIP_DURING = 300;
-const OPTIONS_AVG = 500;
-const TO_GOALS = MONTHLY_FREE - SIP_DURING + OPTIONS_AVG; // 3502
-const UPFRONT = 3800;
-const RH_CASHOUT = 25000;
 const RATE = 85;
 const DEBT = 5000000;
 const GOLD = 5000000;
+const MONTHLY_TO_GOALS = 3502;
+const OPTIONS = 750;
+const UPFRONT = 3800;
+const RH = 30000;
 
-const RENT_SCHEDULE = {
-  '2026-03':851,'2026-04':851,
-  '2026-05':1555,'2026-06':1555,'2026-07':1555,'2026-08':1555,'2026-09':1555,'2026-10':1555,'2026-11':1555,'2026-12':1555,
-  '2027-01':1555,'2027-02':1110,'2027-03':1110,
-};
-
-function getRent(y,m) {
-  const key = `${y}-${String(m+1).padStart(2,'0')}`;
-  return RENT_SCHEDULE[key] || 1555;
-}
-
-// ═══ ALLOCATION BAR ═══
-function renderAlloc() {
-  const items = [
-    {l:'Rent',a:1555,c:'#ef4444'},{l:'Car EMI',a:600,c:'var(--purple)'},{l:'Util+Wifi',a:155,c:'var(--blue)'},
-    {l:'Food',a:500,c:'var(--green)'},{l:'Gas+Personal',a:55,c:'var(--muted)'},{l:'Trips',a:583,c:'#f97316'},
-    {l:'Family Shop',a:250,c:'var(--cyan)'},{l:'SIP',a:300,c:'var(--blue)'},{l:'→ Debt/Gold',a:3002,c:'var(--gold)'},
-  ];
-  const bar = document.getElementById('allocBar');
-  bar.innerHTML = items.map(i => {
-    const p = (i.a/INCOME*100);
-    return `<div style="width:${p}%;background:${i.c};" title="${i.l}: $${i.a}">${p>6?'$'+i.a:''}</div>`;
-  }).join('');
-  document.getElementById('allocLegend').innerHTML = items.map(i =>
-    `<span><span class="dot" style="background:${i.c}"></span>${i.l} $${i.a} (${(i.a/INCOME*100).toFixed(0)}%)</span>`
-  ).join('');
-}
-
-// ═══ TIMELINE ═══
 function renderTimeline() {
   let debt = DEBT, gold = 0;
   const rows = [];
-  const start = new Date(2026, 3);
+  const start = new Date(2026, 3); // April 2026
 
-  for (let m = 0; m < 30 && (debt > 0 || gold < GOLD); m++) {
+  for (let m = 0; m < 18; m++) {
     const d = new Date(start); d.setMonth(d.getMonth() + m);
     const label = d.toLocaleDateString('en-US',{month:'short',year:'2-digit'});
-    const rent = getRent(d.getFullYear(), d.getMonth());
-    const varTotal = Object.values(VARIABLE).reduce((s,v)=>s+v,0);
-    const free = INCOME - (rent + FIXED.car + FIXED.util + FIXED.wifi) - varTotal;
-    const toGoal = free - SIP_DURING + OPTIONS_AVG;
-    let available = toGoal * RATE;
-    let note = '';
 
-    if (m === 0) { available += UPFRONT * RATE; note = '+Savings'; }
-    if (m >= 7 && m <= 9) { available += Math.round(RH_CASHOUT/3) * RATE; note = '+RH'; }
+    let toDebtUsd = 0, toGoldUsd = 0, note = '';
 
-    let toDebt = 0, toGold = 0;
-    if (debt > 0) { toDebt = Math.min(available, debt); debt -= toDebt; available -= toDebt; }
-    if (available > 0 && gold < GOLD) { toGold = Math.min(available, GOLD - gold); gold += toGold; }
+    if (m === 0) {
+      // Month 1: upfront + 70/30 split + options
+      toDebtUsd = UPFRONT + MONTHLY_TO_GOALS * 0.7 + OPTIONS;
+      toGoldUsd = MONTHLY_TO_GOALS * 0.3;
+      note = '+$3.8K savings';
+    } else if (m < 10 && debt > 0) {
+      // Month 2-10: 70/30 + options to debt
+      toDebtUsd = MONTHLY_TO_GOALS * 0.7 + OPTIONS;
+      toGoldUsd = MONTHLY_TO_GOALS * 0.3;
+      // Robinhood in month 8-10
+      if (m >= 7 && m <= 9) {
+        toDebtUsd += RH / 3;
+        note = '+RH $' + Math.round(RH/3/1000) + 'K';
+      }
+    } else {
+      // Month 11-18: all to gold
+      toGoldUsd = MONTHLY_TO_GOALS + OPTIONS;
+      if (debt <= 0 && m === 10) {
+        // First month after debt cleared, add surplus
+        note = 'Debt done! All→gold';
+      }
+    }
 
-    const debtDone = debt === 0 && toDebt > 0;
+    const toDebtInr = Math.round(toDebtUsd * RATE);
+    const toGoldInr = Math.round(toGoldUsd * RATE);
+
+    if (debt > 0) {
+      const pay = Math.min(toDebtInr, debt);
+      debt -= pay;
+      const surplus = toDebtInr - pay;
+      if (surplus > 0) { gold += surplus; }
+    }
+    gold += toGoldInr;
+
+    const debtDone = debt <= 0 && m < 11;
     const goldDone = gold >= GOLD;
 
-    rows.push(`<tr style="${debtDone?'background:var(--gd);':goldDone?'background:var(--yd);':''}">
-      <td>${m+1}</td><td style="font-weight:600;">${label}</td>
-      <td style="color:${rent>1000?'var(--red)':'var(--green)'};">$${rent}</td>
-      <td>$${free.toLocaleString()}</td>
-      <td class="gld">₹${lf(toDebt+toGold)}</td>
+    rows.push(`<tr style="${debtDone&&toDebtInr>0?'background:var(--gd);':goldDone?'background:var(--yd);':''}">
+      <td>${m+1}</td>
+      <td style="font-weight:600;">${label}</td>
+      <td class="pos">${debt>0||toDebtUsd>0?'₹'+lf(Math.round(toDebtUsd*RATE)):'—'}</td>
+      <td class="gld">${toGoldUsd>0?'₹'+lf(toGoldInr):'—'}</td>
       <td>${debt>0?'₹'+lf(debt):'<span class="pos">CLEAR</span>'}</td>
-      <td>₹${lf(gold)}</td>
-      <td style="font-size:8px;color:var(--muted);">${note}${debtDone?' <b class="pos">DEBT FREE!</b>':''}${goldDone?' <b class="gld">GOLD DONE!</b>':''}</td>
+      <td>₹${lf(Math.min(gold,GOLD))}</td>
+      <td style="font-size:8px;color:var(--muted);">${note}${debt<=0&&m<11&&toDebtInr>0?' <b class="pos">DEBT FREE!</b>':''}${goldDone?' <b class="gld">GOLD!</b>':''}</td>
     </tr>`);
-    if (goldDone) break;
   }
   document.getElementById('tlBody').innerHTML = rows.join('');
 }
 
-// ═══ SIP GROWTH ═══
-function renderSipGrowth() {
-  const body = document.getElementById('sipGrowth');
-  const periods = [
-    {y:1,lbl:'Year 1',phase:'Debt (SIP $300/mo)',mo:12,sip:300},
-    {y:2,lbl:'Year 2',phase:'Gold (SIP $300/mo)',mo:24,sip:300},
-    {y:3,lbl:'Year 3',phase:'Full ($3,500/mo)',mo:36,sip:null},
-    {y:5,lbl:'Year 5',phase:'Full ($3,500/mo)',mo:60,sip:null},
-    {y:10,lbl:'Year 10',phase:'Full ($3,500/mo)',mo:120,sip:null},
-  ];
+// Countdown
+const startDate = new Date(2026, 3, 1);
+const endDate = new Date(2027, 8, 30);
+const now = new Date();
+const monthsLeft = Math.max(0, Math.ceil((endDate - now) / (30.44 * 24 * 60 * 60 * 1000)));
+document.getElementById('countdown').textContent = monthsLeft;
 
-  body.innerHTML = periods.map(p => {
-    let invested, at10, at12;
-    if (p.mo <= 24) {
-      invested = 300 * p.mo;
-      at10 = fv(300, 0.10/12, p.mo);
-      at12 = fv(300, 0.12/12, p.mo);
-    } else {
-      const phase12 = fv(300, 0.10/12, 24);
-      const phase12_12 = fv(300, 0.12/12, 24);
-      const extra = p.mo - 24;
-      invested = 300*24 + 3500*extra;
-      at10 = phase12 * Math.pow(1+0.10/12, extra) + fv(3500, 0.10/12, extra);
-      at12 = phase12_12 * Math.pow(1+0.12/12, extra) + fv(3500, 0.12/12, extra);
-    }
-    return `<tr>
-      <td style="font-weight:600;">${p.lbl}</td><td style="font-size:9px;color:var(--muted);">${p.phase}</td>
-      <td>$${Math.round(invested).toLocaleString()}</td>
-      <td class="pos">$${Math.round(at10).toLocaleString()}</td>
-      <td class="pos" style="font-weight:700;">$${Math.round(at12).toLocaleString()}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ═══ NET WORTH TABLE ═══
-function renderNW() {
-  const body = document.getElementById('nwTable');
-  const years = [1,2,3,5,10];
-  body.innerHTML = years.map(y => {
-    const m = y * 12;
-    let portfolio;
-    if (m <= 24) {
-      portfolio = fv(300, 0.10/12, m);
-    } else {
-      portfolio = fv(300, 0.10/12, 24) * Math.pow(1+0.10/12, m-24) + fv(3500, 0.10/12, m-24);
-    }
-    const options = OPTIONS_AVG * m;
-    const debtPaid = m >= 10 ? 'CLEARED' : `₹${lf(Math.max(0,DEBT - (TO_GOALS*RATE*Math.min(m,10) + UPFRONT*RATE + (m>=8?RH_CASHOUT*RATE:0))))}`;
-    const emergSav = 9000;
-    const nw = portfolio + options + emergSav - (m >= 10 ? 0 : 58800);
-
-    return `<tr>
-      <td style="font-weight:600;">Year ${y}</td>
-      <td style="color:var(--blue);">$${Math.round(portfolio).toLocaleString()}</td>
-      <td style="color:var(--purple);">$${options.toLocaleString()}</td>
-      <td style="font-size:9px;">${typeof debtPaid==='string'&&debtPaid==='CLEARED'?'<span class="pos">CLEARED</span>':debtPaid}</td>
-      <td style="font-weight:700;color:${nw>=0?'var(--green)':'var(--red)'};">$${Math.round(nw).toLocaleString()}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ═══ FULL SIP TABLE ═══
-function renderFullSip() {
-  const body = document.getElementById('fullSipTable');
-  [1,2,3,5,7,10].forEach(y => {
-    const m = y * 12;
-    const inv = 3500 * m;
-    const at10 = fv(3500, 0.10/12, m);
-    const at12 = fv(3500, 0.12/12, m);
-    const at15 = fv(3500, 0.15/12, m);
-    body.innerHTML += `<tr>
-      <td style="font-weight:600;">${y} yr</td>
-      <td>$${Math.round(inv).toLocaleString()}</td>
-      <td class="pos">$${Math.round(at10).toLocaleString()}</td>
-      <td class="pos" style="font-weight:700;">$${Math.round(at12).toLocaleString()}</td>
-      <td class="gld" style="font-weight:700;">$${Math.round(at15).toLocaleString()}</td>
-    </tr>`;
-  });
-}
-
-function fv(pmt,r,n){return r===0?pmt*n:pmt*((Math.pow(1+r,n)-1)/r);}
 function lf(n){return n>=10000000?(n/10000000).toFixed(1)+'Cr':n>=100000?(n/100000).toFixed(1)+'L':n.toLocaleString('en-IN');}
 function showTab(id,btn){document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
 
-renderAlloc();
 renderTimeline();
-renderSipGrowth();
-renderNW();
-renderFullSip();
 </script>
 </body>
 </html>
