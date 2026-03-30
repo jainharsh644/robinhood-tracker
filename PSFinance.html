@@ -66,7 +66,7 @@ td{padding:5px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
 <body>
 <div class="mx">
 
-<h1>Finance <span>Planner</span></h1>
+<h1>PS <span>Finance</span></h1>
 <p class="sh">$6,120/month | All goals by Dec 2026 | Job ends Dec 2026</p>
 
 <!-- Countdown -->
@@ -149,9 +149,20 @@ td{padding:5px 6px;border-bottom:1px solid rgba(42,53,80,0.2);}
     <div id="mBudgetVsActual"></div>
   </div>
 
-  <!-- Goal contributions this month -->
+  <!-- AUTO SPLIT: Leftover → Goals -->
+  <div class="card" style="margin-bottom:6px;border-color:var(--gold);">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="lbl" style="margin:0;color:var(--gold);">Leftover → Auto-Split to Goals</div>
+      <span class="gld" style="font-weight:800;font-size:16px;" id="mLeftover">$0</span>
+    </div>
+    <div class="sm" style="margin-bottom:6px;">This is what you transfer to your savings bank account this month. Split as shown below:</div>
+    <div id="mAutoSplit"></div>
+    <div id="mSplitStatus" style="margin-top:4px;"></div>
+  </div>
+
+  <!-- Goal progress this month -->
   <div class="card" style="margin-bottom:6px;">
-    <div class="lbl">Goal Contributions This Month</div>
+    <div class="lbl">Goal Progress (Allocated So Far)</div>
     <div id="mGoalContrib"></div>
   </div>
 
@@ -278,11 +289,11 @@ const DEF_SETTINGS = { pay1:3020, pay2:3100, rent:945, util:100, wifi:30, grocer
 let settings = ls(S_KEY) || DEF_SETTINGS;
 let txns = ls(T_KEY) || [];
 let goals = ls(G_KEY) || [
-  { id:1, name:'Savings (₹10L)', key:'savings', target:11111, deadline:'2026-12', color:'var(--green)' },
-  { id:2, name:'Education Loan (₹13L)', key:'edu_loan', target:14444, deadline:'2026-12', color:'var(--red)' },
-  { id:3, name:'Marriage Fund (₹5L)', key:'marriage', target:5556, deadline:'2026-11', color:'var(--purple)' },
-  { id:4, name:'Trips Fund', key:'trips', target:8000, deadline:'2026-12', color:'#f97316' },
-  { id:5, name:'Shopping Fund', key:'shopping', target:3000, deadline:'2026-12', color:'var(--cyan)' },
+  { id:1, name:'Savings ₹10L', key:'savings', target:11111, targetInr:'₹10,00,000', deadline:'2026-12', color:'var(--green)' },
+  { id:2, name:'Education Loan ₹13L', key:'edu_loan', target:14444, targetInr:'₹13,00,000', deadline:'2026-12', color:'var(--red)' },
+  { id:3, name:'Marriage Fund ₹5L', key:'marriage', target:5556, targetInr:'₹5,00,000', deadline:'2026-11', color:'var(--purple)' },
+  { id:4, name:'Trips Fund $8,000', key:'trips', target:8000, targetInr:'$8,000', deadline:'2026-12', color:'#f97316' },
+  { id:5, name:'Shopping $3,000', key:'shopping', target:3000, targetInr:'$3,000', deadline:'2026-12', color:'var(--cyan)' },
 ];
 
 const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -479,7 +490,56 @@ function renderMonthly() {
     </div>`;
   }).join('');
 
-  // Goal contributions
+  // AUTO-SPLIT: Calculate leftover and split across goals
+  const livingOnlyExp = exp.filter(t => !goalKeys.includes(t.cat)).reduce((s,t) => s+t.amt, 0);
+  const leftover = totalI - livingOnlyExp;
+  document.getElementById('mLeftover').textContent = '$' + Math.round(Math.max(0,leftover)).toLocaleString();
+
+  // Calculate each goal's monthly need (proportional)
+  const goalNeeds = goals.map(g => {
+    const mleft = Math.max(1, monthDiff(ms, g.deadline));
+    const totalPaidG = txns.filter(t => t.type==='expense'&&t.cat===g.key).reduce((s,t)=>s+t.amt,0);
+    const rem = Math.max(0, g.target - totalPaidG);
+    return { ...g, monthlyNeed: Math.round(rem / mleft), remaining: rem };
+  });
+  const totalNeed = goalNeeds.reduce((s,g) => s+g.monthlyNeed, 0);
+
+  const splitEl = document.getElementById('mAutoSplit');
+  if (leftover > 0 && totalI > 0) {
+    splitEl.innerHTML = goalNeeds.map(g => {
+      const share = totalNeed > 0 ? (g.monthlyNeed / totalNeed) : (1 / goals.length);
+      const splitAmt = Math.round(leftover * share);
+      const alreadyPaid = byCat[g.key] || 0;
+      const stillNeeded = Math.max(0, splitAmt - alreadyPaid);
+      const inr = Math.round(splitAmt * settings.rate);
+      return `<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(42,53,80,0.15);font-size:11px;">
+        <span style="width:8px;height:8px;border-radius:2px;background:${g.color||'var(--gold)'};flex-shrink:0;"></span>
+        <span style="flex:1;font-weight:600;">${g.name}</span>
+        <span style="color:var(--muted);font-size:9px;">${(share*100).toFixed(0)}%</span>
+        <span style="font-weight:800;color:var(--gold);width:60px;text-align:right;">$${splitAmt.toLocaleString()}</span>
+        <span style="font-size:9px;color:var(--muted);width:55px;text-align:right;">₹${(inr/1000).toFixed(1)}K</span>
+        ${alreadyPaid > 0 ? `<span class="badge bg" style="font-size:8px;">$${alreadyPaid} sent</span>` : `<span class="badge by" style="font-size:8px;">pending</span>`}
+      </div>`;
+    }).join('') + `<div style="display:flex;justify-content:space-between;padding:6px 0;margin-top:4px;border-top:1px solid var(--gold);font-size:12px;font-weight:800;">
+      <span class="gld">Total to Transfer</span>
+      <span class="gld">$${Math.round(leftover).toLocaleString()} (₹${Math.round(leftover*settings.rate/1000).toLocaleString()}K)</span>
+    </div>`;
+  } else if (totalI === 0) {
+    splitEl.innerHTML = '<div style="font-size:10px;color:var(--muted);">Log your salary to see the auto-split.</div>';
+  } else {
+    splitEl.innerHTML = '<div style="font-size:10px;color:var(--red);">No leftover this month. Living expenses exceed income.</div>';
+  }
+
+  // Split status
+  const statusEl = document.getElementById('mSplitStatus');
+  if (leftover > 0 && totalNeed > 0) {
+    const coverage = (leftover / totalNeed * 100);
+    statusEl.innerHTML = coverage >= 100
+      ? `<div class="tip"><b>On track!</b> Leftover ($${Math.round(leftover)}) covers all goal targets ($${totalNeed}). Transfer the amounts above to your savings account.</div>`
+      : `<div class="warn"><b>Short by $${Math.round(totalNeed - leftover)}.</b> Leftover ($${Math.round(leftover)}) covers ${coverage.toFixed(0)}% of goal targets ($${totalNeed}). Cut expenses or adjust goals.</div>`;
+  } else { statusEl.innerHTML = ''; }
+
+  // Goal contributions (what's already been allocated/sent)
   document.getElementById('mGoalContrib').innerHTML = goals.map(g => {
     const paid = byCat[g.key] || 0;
     const monthsLeft = Math.max(1, monthDiff(ms, g.deadline));
